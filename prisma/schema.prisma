@@ -1,0 +1,218 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum UserRole {
+  MEMBER
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum ProfileStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AccountStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum InterestRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CONTACT_SHARED
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+enum ReportReason {
+  FAKE_PROFILE
+  INAPPROPRIATE_BEHAVIOR
+  HARASSMENT
+  SCAM
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWED
+  RESOLVED
+}
+
+model User {
+  id                       String            @id @default(cuid())
+  email                    String            @unique
+  passwordHash             String
+  fullName                 String
+  phone                    String?
+  role                     UserRole          @default(MEMBER)
+  accountStatus            AccountStatus     @default(ACTIVE)
+  lastLoginAt              DateTime?
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
+  profile                  Profile?
+  sessions                 Session[]
+  sentInterestRequests     InterestRequest[] @relation("InterestRequestSender")
+  receivedInterestRequests InterestRequest[] @relation("InterestRequestRecipient")
+  supportTickets           SupportTicket[]
+  reportsMade              UserReport[]      @relation("ReportReporter")
+  reportsAgainst           UserReport[]      @relation("ReportTarget")
+}
+
+model Profile {
+  id                    String         @id @default(cuid())
+  userId                String         @unique
+  user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profileFor            String?
+  community             String?
+  gender                Gender
+  dateOfBirth           DateTime
+  heightCm              Int?
+  heightLabel           String?
+  maritalStatus         String?
+  religion              String?
+  caste                 String?
+  subCaste              String?
+  gothram               String?
+  star                  String?
+  raasi                 String?
+  country               String?        @default("India")
+  state                 String?
+  city                  String?
+  residencyStatus       String?
+  education             String?
+  employedIn            String?
+  occupation            String?
+  annualIncome          String?
+  familyStatus          String?
+  familyType            String?
+  fatherOccupation      String?
+  motherOccupation      String?
+  brothers              Int?
+  sisters               Int?
+  weightKg              Int?
+  bodyType              String?
+  complexion            String?
+  physicalStatus        String?
+  diet                  String?
+  drinking              String?
+  smoking               String?
+  hobbies               String?
+  about                 String?
+  partnerAgeFrom        Int?
+  partnerAgeTo          Int?
+  partnerHeightCm       Int?
+  partnerMaritalStatus  String?
+  partnerEducation      String?
+  partnerOccupation     String?
+  partnerIncome         String?
+  partnerLocation       String?
+  partnerExpectations   String?
+  profilePhotoUrl       String?
+  horoscopeImageUrl     String?
+  status                ProfileStatus  @default(PENDING)
+  isProfileComplete     Boolean        @default(false)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  interests             ProfileInterest[]
+
+  @@index([gender, status])
+  @@index([city, state])
+}
+
+model InterestTag {
+  id        String            @id @default(cuid())
+  slug      String            @unique
+  label     String            @unique
+  category  String
+  profiles  ProfileInterest[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model ProfileInterest {
+  profileId  String
+  interestId String
+  profile    Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  interest   InterestTag @relation(fields: [interestId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, interestId])
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  @@index([userId, expiresAt])
+}
+
+model InterestRequest {
+  id              String                @id @default(cuid())
+  fromUserId      String
+  toUserId        String
+  status          InterestRequestStatus @default(PENDING)
+  adminNotes      String?
+  contactSharedAt DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  fromUser        User                  @relation("InterestRequestSender", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser          User                  @relation("InterestRequestRecipient", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId])
+  @@index([fromUserId, status])
+  @@index([toUserId, status])
+}
+
+model SupportTicket {
+  id        String              @id @default(cuid())
+  userId    String?
+  user      User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    SupportTicketStatus @default(OPEN)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model UserReport {
+  id                       String       @id @default(cuid())
+  reporterUserId           String?
+  reportedUserId           String?
+  reportedProfileReference String
+  reason                   ReportReason
+  details                  String?
+  status                   ReportStatus @default(OPEN)
+  createdAt                DateTime     @default(now())
+  updatedAt                DateTime     @updatedAt
+  reporter                 User?        @relation("ReportReporter", fields: [reporterUserId], references: [id], onDelete: SetNull)
+  reportedUser             User?        @relation("ReportTarget", fields: [reportedUserId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+}

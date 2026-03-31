@@ -1,0 +1,154 @@
+import { ProfileStatus, UserRole } from "@prisma/client";
+import type { z } from "zod";
+import {
+  buildProfileCompletion,
+  genderToDb,
+  normalizePhone,
+  parseHeightToCentimeters,
+} from "@/lib/profile-utils";
+import { db } from "@/server/db";
+import { AppError } from "@/server/errors";
+import { hashPassword, verifyPassword } from "@/server/auth";
+import { userWithProfileInclude } from "@/server/services/mappers";
+import {
+  adminLoginSchema,
+  loginSchema,
+  registerSchema,
+} from "@/server/validation";
+
+type LoginInput = z.infer<typeof loginSchema>;
+type AdminLoginInput = z.infer<typeof adminLoginSchema>;
+type RegisterInput = z.infer<typeof registerSchema>;
+
+export async function authenticateMember(input: LoginInput) {
+  const user = await db.user.findUnique({
+    where: {
+      email: input.email,
+    },
+    include: userWithProfileInclude,
+  });
+
+  if (!user) {
+    throw new AppError("Invalid email or password.", 401);
+  }
+
+  if (user.role !== UserRole.MEMBER) {
+    throw new AppError("Use the admin portal to access administrator accounts.", 403);
+  }
+
+  if (user.accountStatus === "BLOCKED") {
+    throw new AppError("This account has been blocked. Please contact support.", 403);
+  }
+
+  const passwordMatches = await verifyPassword(input.password, user.passwordHash);
+
+  if (!passwordMatches) {
+    throw new AppError("Invalid email or password.", 401);
+  }
+
+  return db.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      lastLoginAt: new Date(),
+    },
+    include: userWithProfileInclude,
+  });
+}
+
+export async function authenticateAdmin(input: AdminLoginInput) {
+  const user = await db.user.findUnique({
+    where: {
+      email: input.email,
+    },
+    include: userWithProfileInclude,
+  });
+
+  if (!user) {
+    throw new AppError("Invalid email or password.", 401);
+  }
+
+  if (user.role !== UserRole.ADMIN) {
+    throw new AppError("This account does not have administrator access.", 403);
+  }
+
+  if (user.accountStatus === "BLOCKED") {
+    throw new AppError("This administrator account has been blocked.", 403);
+  }
+
+  const passwordMatches = await verifyPassword(input.password, user.passwordHash);
+
+  if (!passwordMatches) {
+    throw new AppError("Invalid email or password.", 401);
+  }
+
+  return db.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      lastLoginAt: new Date(),
+    },
+    include: userWithProfileInclude,
+  });
+}
+
+export async function registerMember(input: RegisterInput) {
+  const existingUser = await db.user.findUnique({
+    where: {
+      email: input.email,
+    },
+  });
+
+  if (existingUser) {
+    throw new AppError("An account with this email address already exists.", 409);
+  }
+
+  const passwordHash = await hashPassword(input.password);
+  const heightCm = parseHeightToCentimeters(input.height);
+
+  return db.user.create({
+    data: {
+      email: input.email,
+      passwordHash,
+      fullName: input.fullName,
+      phone: normalizePhone(input.phone),
+      role: UserRole.MEMBER,
+      profile: {
+        create: {
+          profileFor: input.profileFor,
+          community: input.community || null,
+          gender: genderToDb(input.gender),
+          dateOfBirth: new Date(input.dateOfBirth),
+          heightCm,
+          heightLabel: input.height,
+          maritalStatus: input.maritalStatus,
+          religion: "Hindu",
+          caste: input.caste,
+          country: "India",
+          state: input.state,
+          city: input.city,
+          education: input.education,
+          occupation: input.occupation,
+          annualIncome: input.income || null,
+          about: `Hello, I am ${input.fullName} from ${input.city}. I am looking for a thoughtful, family-oriented life partner.`,
+          partnerExpectations:
+            "Looking for a compatible partner who shares similar values, warmth, and long-term commitment.",
+          isProfileComplete: buildProfileCompletion({
+            fullName: input.fullName,
+            dateOfBirth: input.dateOfBirth,
+            gender: input.gender,
+            city: input.city,
+            state: input.state,
+            education: input.education,
+            occupation: input.occupation,
+            about: `Hello, I am ${input.fullName} from ${input.city}.`,
+          }),
+          status: ProfileStatus.PENDING,
+        },
+      },
+    },
+    include: userWithProfileInclude,
+  });
+}
