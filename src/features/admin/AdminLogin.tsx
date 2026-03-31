@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, FileCheck, Loader2, Shield, ShieldAlert } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
+import { InputControl } from "@/components/shared/FormControls";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { requestJson } from "@/lib/client-request";
 import { useLanguage } from "@/providers/LanguageProvider";
@@ -140,12 +141,12 @@ export function AdminLogin() {
                 <label htmlFor="admin-email" className="block text-[13px] font-medium text-slate-600">
                   {language === "ta" ? "மின்னஞ்சல் முகவரி" : "Email address"}
                 </label>
-                <input
+                <InputControl
                   id="admin-email"
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  className="input-field mt-1.5"
+                  className="mt-1.5"
                   autoComplete="email"
                   required
                 />
@@ -156,12 +157,12 @@ export function AdminLogin() {
                   {t("admin.password")}
                 </label>
                 <div className="relative mt-1.5">
-                  <input
+                  <InputControl
                     id="admin-password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="input-field pr-11"
+                    className="pr-11"
                     autoComplete="current-password"
                     required
                   />

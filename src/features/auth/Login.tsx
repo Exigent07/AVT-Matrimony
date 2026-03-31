@@ -7,6 +7,7 @@ import { ArrowLeft, Heart, Loader2, ShieldCheck, Users } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { AnimatedHeartIcon } from "@/components/shared/AnimatedHeartIcon";
+import { InputControl } from "@/components/shared/FormControls";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { Logo } from "@/components/shared/Logo";
 import { requestJson } from "@/lib/client-request";
@@ -143,12 +144,12 @@ export function Login() {
                 <label htmlFor="email" className="block text-[13px] font-medium text-slate-600">
                   {t("login.email")}
                 </label>
-                <input
+                <InputControl
                   id="email"
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  className="input-field mt-1.5"
+                  className="mt-1.5"
                   placeholder={language === "ta" ? "பெயர்@உதாரணம்.com" : "name@example.com"}
                   autoComplete="email"
                   required
@@ -169,12 +170,12 @@ export function Login() {
                     {language === "ta" ? "கடவுச்சொல் மறந்துவிட்டதா" : "Forgot password"}
                   </Link>
                 </div>
-                <input
+                <InputControl
                   id="password"
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="input-field mt-1.5"
+                  className="mt-1.5"
                   autoComplete="current-password"
                   required
                 />

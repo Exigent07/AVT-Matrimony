@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
-import { DateControl, SelectControl } from "@/components/shared/FormControls";
+import { DateControl, InputControl, SelectControl } from "@/components/shared/FormControls";
 import { Logo } from "@/components/shared/Logo";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { RequestError, requestJson } from "@/lib/client-request";
@@ -671,10 +671,9 @@ export function Register() {
                         </Field>
 
                         <Field label={t("register.full.name")} error={fieldErrors.fullName}>
-                          <input
+                          <InputControl
                             value={formData.fullName}
                             onChange={(event) => updateField("fullName", event.target.value)}
-                            className="input-field"
                             autoComplete="name"
                             aria-invalid={Boolean(fieldErrors.fullName)}
                             required
@@ -709,10 +708,9 @@ export function Register() {
                           hint={copy.communityHint}
                           className="sm:col-span-2"
                         >
-                          <input
+                          <InputControl
                             value={formData.community}
                             onChange={(event) => updateField("community", event.target.value)}
-                            className="input-field"
                             aria-invalid={Boolean(fieldErrors.community)}
                             placeholder={copy.communityHint}
                           />
@@ -731,11 +729,10 @@ export function Register() {
                       >
                         <div className="grid gap-4 sm:grid-cols-2">
                           <Field label={t("register.email")} error={fieldErrors.email}>
-                            <input
+                            <InputControl
                               type="email"
                               value={formData.email}
                               onChange={(event) => updateField("email", event.target.value)}
-                              className="input-field"
                               autoComplete="email"
                               aria-invalid={Boolean(fieldErrors.email)}
                               required
@@ -747,11 +744,10 @@ export function Register() {
                             error={fieldErrors.phone}
                             hint={copy.phoneHint}
                           >
-                            <input
+                            <InputControl
                               type="tel"
                               value={formData.phone}
                               onChange={(event) => updateField("phone", event.target.value)}
-                              className="input-field"
                               autoComplete="tel"
                               aria-invalid={Boolean(fieldErrors.phone)}
                               placeholder={copy.phoneHint}
@@ -760,11 +756,10 @@ export function Register() {
                           </Field>
 
                           <Field label={t("register.password")} error={fieldErrors.password}>
-                            <input
+                            <InputControl
                               type="password"
                               value={formData.password}
                               onChange={(event) => updateField("password", event.target.value)}
-                              className="input-field"
                               autoComplete="new-password"
                               aria-invalid={Boolean(fieldErrors.password)}
                               required
@@ -775,13 +770,12 @@ export function Register() {
                             label={t("register.confirm.password")}
                             error={fieldErrors.confirmPassword}
                           >
-                            <input
+                            <InputControl
                               type="password"
                               value={formData.confirmPassword}
                               onChange={(event) =>
                                 updateField("confirmPassword", event.target.value)
                               }
-                              className="input-field"
                               autoComplete="new-password"
                               aria-invalid={Boolean(fieldErrors.confirmPassword)}
                               required
@@ -853,20 +847,18 @@ export function Register() {
                           </Field>
 
                           <Field label={t("register.education")} error={fieldErrors.education}>
-                            <input
+                            <InputControl
                               value={formData.education}
                               onChange={(event) => updateField("education", event.target.value)}
-                              className="input-field"
                               aria-invalid={Boolean(fieldErrors.education)}
                               required
                             />
                           </Field>
 
                           <Field label={t("register.occupation")} error={fieldErrors.occupation}>
-                            <input
+                            <InputControl
                               value={formData.occupation}
                               onChange={(event) => updateField("occupation", event.target.value)}
-                              className="input-field"
                               aria-invalid={Boolean(fieldErrors.occupation)}
                               required
                             />
@@ -877,40 +869,36 @@ export function Register() {
                             error={fieldErrors.income}
                             hint={copy.incomeHint}
                           >
-                            <input
+                            <InputControl
                               value={formData.income}
                               onChange={(event) => updateField("income", event.target.value)}
-                              className="input-field"
                               aria-invalid={Boolean(fieldErrors.income)}
                               placeholder={copy.incomeHint}
                             />
                           </Field>
 
                           <Field label={t("register.city")} error={fieldErrors.city}>
-                            <input
+                            <InputControl
                               value={formData.city}
                               onChange={(event) => updateField("city", event.target.value)}
-                              className="input-field"
                               aria-invalid={Boolean(fieldErrors.city)}
                               required
                             />
                           </Field>
 
                           <Field label={t("register.state")} error={fieldErrors.state}>
-                            <input
+                            <InputControl
                               value={formData.state}
                               onChange={(event) => updateField("state", event.target.value)}
-                              className="input-field"
                               aria-invalid={Boolean(fieldErrors.state)}
                               required
                             />
                           </Field>
 
                           <Field label={t("register.caste")} error={fieldErrors.caste}>
-                            <input
+                            <InputControl
                               value={formData.caste}
                               onChange={(event) => updateField("caste", event.target.value)}
-                              className="input-field"
                               aria-invalid={Boolean(fieldErrors.caste)}
                               required
                             />

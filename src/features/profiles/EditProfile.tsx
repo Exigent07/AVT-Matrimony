@@ -14,7 +14,12 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { DateControl, SelectControl } from "@/components/shared/FormControls";
+import {
+  DateControl,
+  InputControl,
+  SelectControl,
+  TextareaControl,
+} from "@/components/shared/FormControls";
 import { InterestsSelector } from "@/components/shared/InterestsSelector";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -396,10 +401,9 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
               >
                 <FieldGrid>
                   <Field label={labels.fullName}>
-                    <input
+                    <InputControl
                       value={formData.fullName}
                       onChange={(event) => updateField("fullName", event.target.value)}
-                      className="input-field"
                       required
                     />
                   </Field>
@@ -446,10 +450,10 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                     </SelectControl>
                   </Field>
                   <Field label={labels.weight}>
-                    <input
+                    <InputControl
                       value={formData.weight}
                       onChange={(event) => updateField("weight", event.target.value)}
-                      className="input-field"
+                      inputMode="numeric"
                     />
                   </Field>
                 </FieldGrid>
@@ -462,83 +466,72 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
               >
                 <FieldGrid>
                   <Field label={labels.communityLabel}>
-                    <input
+                    <InputControl
                       value={formData.community}
                       onChange={(event) => updateField("community", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.religion}>
-                    <input
+                    <InputControl
                       value={formData.religion}
                       onChange={(event) => updateField("religion", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.caste}>
-                    <input
+                    <InputControl
                       value={formData.caste}
                       onChange={(event) => updateField("caste", event.target.value)}
-                      className="input-field"
                       required
                     />
                   </Field>
                   <Field label={labels.subCaste}>
-                    <input
+                    <InputControl
                       value={formData.subCaste}
                       onChange={(event) => updateField("subCaste", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.gothram}>
-                    <input
+                    <InputControl
                       value={formData.gothram}
                       onChange={(event) => updateField("gothram", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.star}>
-                    <input
+                    <InputControl
                       value={formData.star}
                       onChange={(event) => updateField("star", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.raasi}>
-                    <input
+                    <InputControl
                       value={formData.raasi}
                       onChange={(event) => updateField("raasi", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.country}>
-                    <input
+                    <InputControl
                       value={formData.country}
                       onChange={(event) => updateField("country", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.state}>
-                    <input
+                    <InputControl
                       value={formData.state}
                       onChange={(event) => updateField("state", event.target.value)}
-                      className="input-field"
                       required
                     />
                   </Field>
                   <Field label={labels.city}>
-                    <input
+                    <InputControl
                       value={formData.city}
                       onChange={(event) => updateField("city", event.target.value)}
-                      className="input-field"
                       required
                     />
                   </Field>
                   <Field label={labels.residency}>
-                    <input
+                    <InputControl
                       value={formData.residencyStatus}
                       onChange={(event) => updateField("residencyStatus", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                 </FieldGrid>
@@ -551,75 +544,67 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
               >
                 <FieldGrid>
                   <Field label={labels.education}>
-                    <input
+                    <InputControl
                       value={formData.education}
                       onChange={(event) => updateField("education", event.target.value)}
-                      className="input-field"
                       required
                     />
                   </Field>
                   <Field label={labels.employedIn}>
-                    <input
+                    <InputControl
                       value={formData.employedIn}
                       onChange={(event) => updateField("employedIn", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.occupation}>
-                    <input
+                    <InputControl
                       value={formData.occupation}
                       onChange={(event) => updateField("occupation", event.target.value)}
-                      className="input-field"
                       required
                     />
                   </Field>
                   <Field label={labels.income}>
-                    <input
+                    <InputControl
                       value={formData.income}
                       onChange={(event) => updateField("income", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.familyStatus}>
-                    <input
+                    <InputControl
                       value={formData.familyStatus}
                       onChange={(event) => updateField("familyStatus", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.familyType}>
-                    <input
+                    <InputControl
                       value={formData.familyType}
                       onChange={(event) => updateField("familyType", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.fatherOccupation}>
-                    <input
+                    <InputControl
                       value={formData.fatherOccupation}
                       onChange={(event) => updateField("fatherOccupation", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.motherOccupation}>
-                    <input
+                    <InputControl
                       value={formData.motherOccupation}
                       onChange={(event) => updateField("motherOccupation", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.brothers}>
-                    <input
+                    <InputControl
                       value={formData.brothers}
                       onChange={(event) => updateField("brothers", event.target.value)}
-                      className="input-field"
+                      inputMode="numeric"
                     />
                   </Field>
                   <Field label={labels.sisters}>
-                    <input
+                    <InputControl
                       value={formData.sisters}
                       onChange={(event) => updateField("sisters", event.target.value)}
-                      className="input-field"
+                      inputMode="numeric"
                     />
                   </Field>
                 </FieldGrid>
@@ -632,39 +617,34 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
               >
                 <FieldGrid>
                   <Field label={labels.diet}>
-                    <input
+                    <InputControl
                       value={formData.diet}
                       onChange={(event) => updateField("diet", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.drinking}>
-                    <input
+                    <InputControl
                       value={formData.drinking}
                       onChange={(event) => updateField("drinking", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.smoking}>
-                    <input
+                    <InputControl
                       value={formData.smoking}
                       onChange={(event) => updateField("smoking", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.hobbies} className="md:col-span-2">
-                    <input
+                    <InputControl
                       value={formData.hobbies}
                       onChange={(event) => updateField("hobbies", event.target.value)}
-                      className="input-field"
                       placeholder={labels.hobbiesPlaceholder}
                     />
                   </Field>
                   <Field label={labels.about} className="md:col-span-2">
-                    <textarea
+                    <TextareaControl
                       value={formData.about}
                       onChange={(event) => updateField("about", event.target.value)}
-                      className="input-field min-h-32"
                       placeholder={labels.aboutPlaceholder}
                       required
                     />
@@ -679,70 +659,64 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
               >
                 <FieldGrid>
                   <Field label={labels.partnerAgeFrom}>
-                    <input
+                    <InputControl
                       value={formData.partnerAgeFrom}
                       onChange={(event) => updateField("partnerAgeFrom", event.target.value)}
-                      className="input-field"
+                      inputMode="numeric"
                     />
                   </Field>
                   <Field label={labels.partnerAgeTo}>
-                    <input
+                    <InputControl
                       value={formData.partnerAgeTo}
                       onChange={(event) => updateField("partnerAgeTo", event.target.value)}
-                      className="input-field"
+                      inputMode="numeric"
                     />
                   </Field>
                   <Field label={labels.partnerHeight}>
-                    <input
+                    <InputControl
                       value={formData.partnerHeight}
                       onChange={(event) => updateField("partnerHeight", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.partnerMaritalStatus}>
-                    <input
+                    <InputControl
                       value={formData.partnerMaritalStatus}
                       onChange={(event) =>
                         updateField("partnerMaritalStatus", event.target.value)
                       }
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.partnerEducation}>
-                    <input
+                    <InputControl
                       value={formData.partnerEducation}
                       onChange={(event) => updateField("partnerEducation", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.partnerOccupation}>
-                    <input
+                    <InputControl
                       value={formData.partnerOccupation}
                       onChange={(event) => updateField("partnerOccupation", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.partnerIncome}>
-                    <input
+                    <InputControl
                       value={formData.partnerIncome}
                       onChange={(event) => updateField("partnerIncome", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.partnerLocation}>
-                    <input
+                    <InputControl
                       value={formData.partnerLocation}
                       onChange={(event) => updateField("partnerLocation", event.target.value)}
-                      className="input-field"
                     />
                   </Field>
                   <Field label={labels.partnerExpectations} className="md:col-span-2">
-                    <textarea
+                    <TextareaControl
                       value={formData.partnerExpectations}
                       onChange={(event) =>
                         updateField("partnerExpectations", event.target.value)
                       }
-                      className="input-field min-h-28"
+                      className="min-h-28"
                       placeholder={labels.partnerExpectationsPlaceholder}
                       required
                     />
@@ -757,19 +731,17 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
               >
                 <FieldGrid>
                   <Field label={labels.email}>
-                    <input
+                    <InputControl
                       type="email"
                       value={formData.email}
                       onChange={(event) => updateField("email", event.target.value)}
-                      className="input-field"
                       required
                     />
                   </Field>
                   <Field label={labels.phone}>
-                    <input
+                    <InputControl
                       value={formData.phone}
                       onChange={(event) => updateField("phone", event.target.value)}
-                      className="input-field"
                       required
                     />
                   </Field>

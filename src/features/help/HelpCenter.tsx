@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, Mail, MessageSquare, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/layout/AppHeader";
+import {
+  InputControl,
+  SelectControl,
+  TextareaControl,
+} from "@/components/shared/FormControls";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { requestJson } from "@/lib/client-request";
 import { SITE_CONFIG } from "@/lib/site-config";
@@ -189,17 +194,17 @@ export function HelpCenter({
                 <form onSubmit={submitContact} className="mt-5 space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
                     <Field label={language === "ta" ? "உங்கள் பெயர்" : "Your name"}>
-                      <input value={contactForm.name} onChange={(event) => setContactForm((c) => ({ ...c, name: event.target.value }))} className="input-field" required />
+                      <InputControl value={contactForm.name} onChange={(event) => setContactForm((c) => ({ ...c, name: event.target.value }))} required />
                     </Field>
                     <Field label={language === "ta" ? "மின்னஞ்சல் முகவரி" : "Email address"}>
-                      <input type="email" value={contactForm.email} onChange={(event) => setContactForm((c) => ({ ...c, email: event.target.value }))} className="input-field" required />
+                      <InputControl type="email" value={contactForm.email} onChange={(event) => setContactForm((c) => ({ ...c, email: event.target.value }))} required />
                     </Field>
                   </div>
                   <Field label={language === "ta" ? "தலைப்பு" : "Subject"}>
-                    <input value={contactForm.subject} onChange={(event) => setContactForm((c) => ({ ...c, subject: event.target.value }))} className="input-field" required />
+                    <InputControl value={contactForm.subject} onChange={(event) => setContactForm((c) => ({ ...c, subject: event.target.value }))} required />
                   </Field>
                   <Field label={language === "ta" ? "செய்தி" : "Message"}>
-                    <textarea value={contactForm.message} onChange={(event) => setContactForm((c) => ({ ...c, message: event.target.value }))} className="input-field min-h-32" required />
+                    <TextareaControl value={contactForm.message} onChange={(event) => setContactForm((c) => ({ ...c, message: event.target.value }))} required />
                   </Field>
                   <button type="submit" disabled={isSubmittingContact} className="btn-primary">
                     {isSubmittingContact ? (language === "ta" ? "சமர்ப்பிக்கிறது" : "Submitting") : language === "ta" ? "கோரிக்கையை சமர்ப்பி" : "Submit request"}
@@ -239,20 +244,20 @@ export function HelpCenter({
               <form onSubmit={submitReport} className="mt-5 space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label={language === "ta" ? "சுயவிவர அல்லது உறுப்பினர் ஐடி" : "Profile or member ID"}>
-                    <input value={reportForm.profileId} onChange={(event) => setReportForm((c) => ({ ...c, profileId: event.target.value }))} className="input-field" required />
+                    <InputControl value={reportForm.profileId} onChange={(event) => setReportForm((c) => ({ ...c, profileId: event.target.value }))} required />
                   </Field>
                   <Field label={language === "ta" ? "காரணம்" : "Reason"}>
-                    <select value={reportForm.reason} onChange={(event) => setReportForm((c) => ({ ...c, reason: event.target.value }))} className="input-field">
+                    <SelectControl value={reportForm.reason} onChange={(event) => setReportForm((c) => ({ ...c, reason: event.target.value }))}>
                       <option value="FAKE_PROFILE">{language === "ta" ? "போலி சுயவிவரம் அல்லது தவறான தகவல்" : "Fake profile or false information"}</option>
                       <option value="INAPPROPRIATE_BEHAVIOR">{language === "ta" ? "ஒழுங்கற்ற நடத்தை" : "Inappropriate behaviour"}</option>
                       <option value="HARASSMENT">{translateUiTerm("harassment", language)}</option>
                       <option value="SCAM">{translateUiTerm("scam", language)}</option>
                       <option value="OTHER">{language === "ta" ? "வேறு கவலை" : "Other concern"}</option>
-                    </select>
+                    </SelectControl>
                   </Field>
                 </div>
                 <Field label={language === "ta" ? "கூடுதல் விவரங்கள்" : "Additional details"}>
-                  <textarea value={reportForm.details} onChange={(event) => setReportForm((c) => ({ ...c, details: event.target.value }))} className="input-field min-h-32" required />
+                  <TextareaControl value={reportForm.details} onChange={(event) => setReportForm((c) => ({ ...c, details: event.target.value }))} required />
                 </Field>
                 <button type="submit" disabled={isSubmittingReport} className="btn-primary">
                   {isSubmittingReport ? (language === "ta" ? "சமர்ப்பிக்கிறது" : "Submitting") : language === "ta" ? "புகாரை சமர்ப்பி" : "Submit report"}

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { AnimatedHeartIcon } from "@/components/shared/AnimatedHeartIcon";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { InputControl, SelectControl } from "@/components/shared/FormControls";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { requestJson } from "@/lib/client-request";
@@ -137,10 +138,10 @@ export function ProfileSearch({
             <div className="mt-7 grid gap-3 xl:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
+                <InputControl
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  className="input-field pl-10"
+                  className="pl-10"
                   placeholder={language === "ta" ? "பெயர், நகரம், தொழில் அல்லது சாதி மூலம் தேடுங்கள்" : "Search by name, city, occupation, or caste"}
                 />
               </div>
@@ -164,16 +165,22 @@ export function ProfileSearch({
                   {language === "ta" ? "வயது வரம்பு" : "Age range"}
                 </div>
                 <div className="mt-1.5 flex items-center gap-2">
-                  <input
-                    type="number" min={18} max={60} value={ageRange[0]}
+                  <InputControl
+                    type="number"
+                    min={18}
+                    max={60}
+                    value={ageRange[0]}
                     onChange={(event) => updateMinimumAge(event.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm outline-none focus:border-[#B91C1C] transition-colors"
+                    className="min-h-10 rounded-[1rem] px-3 py-2 text-sm"
                   />
                   <span className="text-xs text-slate-400">{language === "ta" ? "முதல்" : "to"}</span>
-                  <input
-                    type="number" min={18} max={60} value={ageRange[1]}
+                  <InputControl
+                    type="number"
+                    min={18}
+                    max={60}
+                    value={ageRange[1]}
                     onChange={(event) => updateMaximumAge(event.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm outline-none focus:border-[#B91C1C] transition-colors"
+                    className="min-h-10 rounded-[1rem] px-3 py-2 text-sm"
                   />
                 </div>
               </div>
@@ -354,17 +361,18 @@ function FilterSelect({ label, allLabel, value, onChange, options }: {
   return (
     <div className="panel-muted px-3.5 py-2.5">
       <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</div>
-      <select
+      <SelectControl
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-1.5 w-full bg-transparent text-sm text-slate-700 outline-none"
+        size="sm"
+        className="mt-1.5"
       >
         {options.map((option) => (
           <option key={option} value={option}>
             {option === "all" ? allLabel : translateDisplayValue(option, language)}
           </option>
         ))}
-      </select>
+      </SelectControl>
     </div>
   );
 }
