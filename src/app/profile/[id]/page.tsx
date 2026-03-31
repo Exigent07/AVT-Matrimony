@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { requireViewer } from "@/server/auth";
 import { ProfileView } from "@/features/profiles/ProfileView";
+import { AppError } from "@/server/errors";
 import { getProfileDetailById } from "@/server/services/profiles";
 
 export const metadata: Metadata = {
@@ -14,7 +16,17 @@ export default async function Page({
 }) {
   const viewer = await requireViewer();
   const { id } = await params;
-  const data = await getProfileDetailById(viewer.id, id);
+  let data;
+
+  try {
+    data = await getProfileDetailById(viewer.id, id);
+  } catch (error) {
+    if (error instanceof AppError && error.statusCode === 404) {
+      notFound();
+    }
+
+    throw error;
+  }
 
   return (
     <ProfileView

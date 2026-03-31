@@ -26,9 +26,6 @@ export default async function Page({
   const viewer = await getCurrentViewer();
   const params = await searchParams;
   const helpTab = getHelpTab(params.tab);
-  const backTo = viewer?.role === "ADMIN" ? "/admin/dashboard" : viewer ? "/dashboard" : "/";
-  const backLabel =
-    viewer?.role === "ADMIN" ? "Admin Dashboard" : viewer ? "Dashboard" : "Home";
 
   return (
     <HelpCenter
@@ -37,8 +34,6 @@ export default async function Page({
       initialTab={helpTab}
       initialProfileId={params.profileId ?? ""}
       initialSubject={params.subject ?? ""}
-      backTo={backTo}
-      backLabel={backLabel}
       viewer={viewer}
     />
   );

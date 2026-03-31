@@ -13,7 +13,7 @@ import { Logo } from "@/components/shared/Logo";
 
 export function AdminLogin() {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -21,13 +21,13 @@ export function AdminLogin() {
   const adminHighlights = [
     {
       icon: FileCheck,
-      title: "Profile moderation",
-      description: "Review new and updated member profiles before approval.",
+      title: language === "ta" ? "சுயவிவர பரிசீலனை" : "Profile moderation",
+      description: language === "ta" ? "புதிய மற்றும் புதுப்பிக்கப்பட்ட உறுப்பினர் சுயவிவரங்களை அங்கீகாரத்திற்கு முன் பரிசீலிக்கவும்." : "Review new and updated member profiles before approval.",
     },
     {
       icon: ShieldAlert,
-      title: "Safety workflow",
-      description: "Track reports, suspicious activity, and support follow-ups from one console.",
+      title: language === "ta" ? "பாதுகாப்பு நடைமுறை" : "Safety workflow",
+      description: language === "ta" ? "ஒரே கட்டுப்பாட்டு பலகையிலிருந்து புகார்கள், சந்தேகத்திற்குரிய செயல்பாடுகள் மற்றும் ஆதரவு பின்தொடர்வுகளை கண்காணிக்கவும்." : "Track reports, suspicious activity, and support follow-ups from one console.",
     },
   ];
 
@@ -40,11 +40,11 @@ export function AdminLogin() {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
-      toast.success("Administrator access granted.");
+      toast.success(language === "ta" ? "நிர்வாகி அணுகல் வழங்கப்பட்டது." : "Administrator access granted.");
       router.push("/admin/dashboard");
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to sign in.");
+      toast.error(error instanceof Error ? error.message : language === "ta" ? "உள்நுழைய முடியவில்லை." : "Unable to sign in.");
     } finally {
       setIsLoading(false);
     }
@@ -62,14 +62,15 @@ export function AdminLogin() {
               className="hidden lg:block"
             >
               <div className="hero-surface h-full p-8 xl:p-10">
-                <span className="eyebrow-pill">Administrator access</span>
+                <span className="eyebrow-pill">{language === "ta" ? "நிர்வாகி அணுகல்" : "Administrator access"}</span>
                 <div className="mt-8 max-w-lg">
                   <h1 className="text-5xl text-slate-900 xl:text-[4rem]" style={{ fontFamily: "var(--font-display)" }}>
-                    Operate the platform with a clearer control surface.
+                    {language === "ta" ? "மேடையை தெளிவான கட்டுப்பாட்டு அனுபவத்துடன் இயக்குங்கள்." : "Operate the platform with a clearer control surface."}
                   </h1>
                   <p className="mt-5 text-base leading-relaxed text-slate-600 xl:text-lg">
-                    Sign in to review member activity, resolve moderation queues, and keep support
-                    and safety workflows moving smoothly.
+                    {language === "ta"
+                      ? "உறுப்பினர் செயல்பாட்டைப் பார்வையிட, பரிசீலனை வரிசைகளைச் சீர்செய்ய, மற்றும் ஆதரவு மற்றும் பாதுகாப்பு நடைமுறைகளை மென்மையாக நகர்த்த உள்நுழையவும்."
+                      : "Sign in to review member activity, resolve moderation queues, and keep support and safety workflows moving smoothly."}
                   </p>
                 </div>
 
@@ -107,10 +108,10 @@ export function AdminLogin() {
               className="inline-flex items-center gap-2 rounded-full border border-[#B91C1C]/10 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span>User sign in</span>
+              <span>{language === "ta" ? "உறுப்பினர் உள்நுழைவு" : "User sign in"}</span>
             </button>
             <Link href="/">
-              <Logo size="small" showText={false} variant="light" />
+              <Logo size="medium" showText={false} variant="light" />
             </Link>
           </motion.div>
 
@@ -123,7 +124,7 @@ export function AdminLogin() {
             <div className="mb-5 flex items-center gap-2.5">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[#B91C1C]/15 bg-[#B91C1C]/[0.06] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#B91C1C]">
                 <Shield className="h-3 w-3" />
-                Secure Admin Access
+                {language === "ta" ? "பாதுகாப்பான நிர்வாகி அணுகல்" : "Secure Admin Access"}
               </span>
             </div>
 
@@ -131,13 +132,13 @@ export function AdminLogin() {
               {t("admin.portal.title")}
             </h1>
             <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-              Sign in with the administrator credentials configured for this local environment.
+              {language === "ta" ? "இந்த உள்ளூர் சூழலுக்கு அமைக்கப்பட்ட நிர்வாகி நற்சான்றுகளுடன் உள்நுழையவும்." : "Sign in with the administrator credentials configured for this local environment."}
             </p>
 
             <form onSubmit={handleSubmit} className="mt-7 space-y-4">
               <div>
                 <label htmlFor="admin-email" className="block text-[13px] font-medium text-slate-600">
-                  Email address
+                  {language === "ta" ? "மின்னஞ்சல் முகவரி" : "Email address"}
                 </label>
                 <input
                   id="admin-email"
@@ -182,7 +183,7 @@ export function AdminLogin() {
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Signing in</span>
+                    <span>{language === "ta" ? "உள்நுழைகிறது" : "Signing in"}</span>
                   </>
                 ) : (
                   <span>{t("admin.login.to.panel")}</span>
@@ -195,9 +196,9 @@ export function AdminLogin() {
             </p>
 
             <div className="mt-4 text-center text-sm text-slate-500">
-              Not an administrator?{" "}
+              {language === "ta" ? "நிர்வாகி அல்லவா?" : "Not an administrator?"}{" "}
               <Link href="/login" className="font-semibold text-[#B91C1C] transition-colors hover:text-[#991B1B]">
-                Return to member sign in
+                {language === "ta" ? "உறுப்பினர் உள்நுழைவுக்கு திரும்பவும்" : "Return to member sign in"}
               </Link>
             </div>
           </motion.div>

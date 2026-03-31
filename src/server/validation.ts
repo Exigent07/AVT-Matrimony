@@ -3,13 +3,72 @@ import { INTEREST_LABELS } from "@/lib/constants/interests";
 import { isAdult, normalizePhone } from "@/lib/profile-utils";
 
 const emailSchema = z.email().trim().toLowerCase();
+export const PASSWORD_RULE_MESSAGE =
+  "Use 8-72 characters with uppercase, lowercase, number, and symbol.";
 const phoneSchema = z
   .string()
   .trim()
   .transform((value) => normalizePhone(value))
   .refine((value) => value.length === 10, "Enter a valid 10-digit phone number.");
+const passwordSchema = z
+  .string()
+  .trim()
+  .regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,72}$/,
+    PASSWORD_RULE_MESSAGE,
+  );
 
 const optionalText = z.string().trim().optional().transform((value) => value || "");
+const optionalBoundedText = z
+  .string()
+  .trim()
+  .max(80, "Keep this under 80 characters.")
+  .optional()
+  .transform((value) => value || "");
+
+function humanTextSchema(
+  requiredMessage: string,
+  options?: {
+    min?: number;
+    max?: number;
+    allowNumbers?: boolean;
+    invalidMessage?: string;
+  },
+) {
+  const min = options?.min ?? 2;
+  const max = options?.max ?? 80;
+  const invalidMessage =
+    options?.invalidMessage ?? "Use letters, spaces, and common punctuation only.";
+  const pattern = options?.allowNumbers
+    ? /^[\p{L}\p{N}&/.,'()\- ]+$/u
+    : /^[\p{L}&/.,'()\- ]+$/u;
+
+  return z
+    .string()
+    .trim()
+    .min(min, requiredMessage)
+    .max(max, `Keep this under ${max} characters.`)
+    .refine((value) => /[\p{L}\p{N}]/u.test(value), requiredMessage)
+    .refine((value) => !/[<>]/.test(value), invalidMessage)
+    .refine((value) => pattern.test(value), invalidMessage);
+}
+
+const nameSchema = humanTextSchema("Enter your full name.", {
+  max: 80,
+  invalidMessage: "Use letters, spaces, and common punctuation for your name.",
+});
+
+const educationSchema = humanTextSchema("Enter your education.", {
+  allowNumbers: true,
+});
+
+const occupationSchema = humanTextSchema("Enter your occupation.", {
+  allowNumbers: true,
+});
+
+const citySchema = humanTextSchema("Enter your city.");
+const stateSchema = humanTextSchema("Enter your state.");
+const casteSchema = humanTextSchema("Enter your caste.");
 
 const interestSchema = z.array(z.string().trim()).max(15).refine(
   (interests) => interests.every((interest) => INTEREST_LABELS.has(interest)),
@@ -26,22 +85,22 @@ export const adminLoginSchema = loginSchema;
 export const registerSchema = z
   .object({
     profileFor: z.string().trim().min(1, "Select who this profile is for."),
-    fullName: z.string().trim().min(2, "Enter your full name."),
+    fullName: nameSchema,
     gender: z.enum(["male", "female"]),
     dateOfBirth: z.string().date(),
-    community: optionalText,
+    community: optionalBoundedText,
     email: emailSchema,
     phone: phoneSchema,
-    password: z.string().min(8, "Password must be at least 8 characters."),
+    password: passwordSchema,
     confirmPassword: z.string(),
     height: z.string().trim().min(1, "Select your height."),
     maritalStatus: z.string().trim().min(1, "Select your marital status."),
-    education: z.string().trim().min(2, "Enter your education."),
-    occupation: z.string().trim().min(2, "Enter your occupation."),
-    income: optionalText,
-    city: z.string().trim().min(2, "Enter your city."),
-    state: z.string().trim().min(2, "Enter your state."),
-    caste: z.string().trim().min(2, "Enter your caste."),
+    education: educationSchema,
+    occupation: occupationSchema,
+    income: optionalBoundedText,
+    city: citySchema,
+    state: stateSchema,
+    caste: casteSchema,
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.confirmPassword) {
@@ -63,30 +122,30 @@ export const registerSchema = z
 
 export const profileUpdateSchema = z
   .object({
-    fullName: z.string().trim().min(2, "Enter your full name."),
+    fullName: nameSchema,
     gender: z.enum(["male", "female"]),
     dateOfBirth: z.string().date(),
-    community: optionalText,
+    community: optionalBoundedText,
     maritalStatus: z.string().trim().min(1, "Select your marital status."),
     height: z.string().trim().min(1, "Select your height."),
     weight: optionalText,
     bodyType: optionalText,
     complexion: optionalText,
     physicalStatus: optionalText,
-    religion: optionalText,
-    caste: z.string().trim().min(2, "Enter your caste."),
+    religion: optionalBoundedText,
+    caste: casteSchema,
     subCaste: optionalText,
     gothram: optionalText,
     star: optionalText,
     raasi: optionalText,
     country: optionalText,
-    state: z.string().trim().min(2, "Enter your state."),
-    city: z.string().trim().min(2, "Enter your city."),
+    state: stateSchema,
+    city: citySchema,
     residencyStatus: optionalText,
-    education: z.string().trim().min(2, "Enter your education."),
+    education: educationSchema,
     employedIn: optionalText,
-    occupation: z.string().trim().min(2, "Enter your occupation."),
-    income: optionalText,
+    occupation: occupationSchema,
+    income: optionalBoundedText,
     familyStatus: optionalText,
     familyType: optionalText,
     fatherOccupation: optionalText,
@@ -97,7 +156,11 @@ export const profileUpdateSchema = z
     drinking: optionalText,
     smoking: optionalText,
     hobbies: optionalText,
-    about: z.string().trim().min(20, "Tell members a little more about yourself."),
+    about: z
+      .string()
+      .trim()
+      .min(20, "Tell members a little more about yourself.")
+      .max(1200, "Keep your profile summary under 1200 characters."),
     partnerAgeFrom: optionalText,
     partnerAgeTo: optionalText,
     partnerHeight: optionalText,
@@ -109,7 +172,8 @@ export const profileUpdateSchema = z
     partnerExpectations: z
       .string()
       .trim()
-      .min(12, "Describe your partner expectations."),
+      .min(12, "Describe your partner expectations.")
+      .max(800, "Keep your partner expectations under 800 characters."),
     email: emailSchema,
     phone: phoneSchema,
     profilePhotoUrl: z.string().trim().nullable().optional(),

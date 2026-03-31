@@ -3,6 +3,7 @@ import {
   type SupportTicket,
 } from "@prisma/client";
 import {
+  buildProfileCompletionState,
   calculateAge,
   displayGender,
   formatHeight,
@@ -69,6 +70,30 @@ function ensureProfile(user: UserWithProfile) {
 }
 
 export function buildSessionViewer(user: UserWithProfile): SessionViewer {
+  const completion = buildProfileCompletionState({
+    fullName: user.fullName,
+    gender: user.profile?.gender,
+    dateOfBirth: user.profile?.dateOfBirth,
+    height: user.profile?.heightLabel ?? user.profile?.heightCm,
+    maritalStatus: user.profile?.maritalStatus,
+    profilePhotoUrl: user.profile?.profilePhotoUrl,
+    community: user.profile?.community,
+    religion: user.profile?.religion,
+    caste: user.profile?.caste,
+    city: user.profile?.city,
+    state: user.profile?.state,
+    education: user.profile?.education,
+    occupation: user.profile?.occupation,
+    annualIncome: user.profile?.annualIncome,
+    about: user.profile?.about,
+    hobbies: user.profile?.hobbies,
+    selectedInterests: getInterestLabels(user),
+    partnerExpectations: user.profile?.partnerExpectations,
+    email: user.email,
+    phone: user.phone,
+    horoscopeImageUrl: user.profile?.horoscopeImageUrl,
+  });
+
   return {
     id: user.id,
     fullName: user.fullName,
@@ -78,7 +103,8 @@ export function buildSessionViewer(user: UserWithProfile): SessionViewer {
     role: user.role,
     accountStatus: user.accountStatus,
     profileStatus: user.profile?.status ?? null,
-    profileComplete: user.profile?.isProfileComplete ?? false,
+    profileComplete: completion.isComplete,
+    profileCompletionPercentage: completion.percentage,
     gender: displayGender(user.profile?.gender),
     city: user.profile?.city ?? null,
     selectedInterests: getInterestLabels(user),

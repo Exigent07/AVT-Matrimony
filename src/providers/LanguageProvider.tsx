@@ -2,12 +2,13 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-type Language = 'en' | 'ta';
+export type Language = 'en' | 'ta';
+type TranslationParams = Record<string, string | number>;
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: TranslationParams) => string;
 }
 
 const translations = {
@@ -644,13 +645,20 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('language', lang);
   };
 
-  const t = (key: string): string => {
+  const t = (key: string, params?: TranslationParams): string => {
     const translation = translations[language][key as keyof typeof translations.en];
     if (!translation) {
       console.warn(`Translation missing for key: ${key}`);
       return key;
     }
-    return translation;
+
+    if (!params) {
+      return translation;
+    }
+
+    return Object.entries(params).reduce((resolved, [paramKey, value]) => {
+      return resolved.replaceAll(`{${paramKey}}`, String(value));
+    }, translation);
   };
 
   return (

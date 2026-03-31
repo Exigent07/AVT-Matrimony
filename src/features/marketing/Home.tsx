@@ -1,6 +1,6 @@
 "use client";
 
-import { Header } from '@/components/layout/Header';
+import { AppHeader } from "@/components/layout/AppHeader";
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { AnimatedHeartIcon } from '@/components/shared/AnimatedHeartIcon';
 import { PageTransition } from '@/components/shared/PageTransition';
@@ -16,7 +16,63 @@ interface HomeProps {
 
 export function Home({ viewer }: HomeProps) {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const copy =
+    language === "ta"
+      ? {
+          trustLabel: "50,000+ தமிழ் குடும்பங்கள் நம்பும் தளம்",
+          exploreProcess: "செயல்முறையை அறிக",
+          heroChips: [
+            "காட்சிக்கு முன் சரிபார்க்கப்பட்ட சுயவிவரங்கள்",
+            "குடும்ப முன்னுரிமையுள்ள அறிமுகங்கள் மற்றும் ஆதரவு",
+            "பிராந்தியங்களை தாண்டிய தமிழ் சமூக கவனம்",
+          ],
+          whyLabel: "குடும்பங்கள் ஏன் AV-ஐத் தேர்வுசெய்கின்றன",
+          whyTitle: "அமைதியான, நோக்கமுள்ள பொருத்தப் பயணம்",
+          storyLabel: "சமீபத்திய வெற்றிக் கதை",
+          readStories: "மேலும் கதைகளை வாசிக்கவும்",
+          qualityLabel: "தரத்துக்காக வடிவமைக்கப்பட்டது",
+          qualityTitle: "சத்தத்திற்காக அல்ல, நம்பிக்கைக்காக உருவாக்கப்பட்டது.",
+          qualityDescription: "அதிக ஸ்வைப் கவனச்சிதறல்கள் இல்லை, சத்தமான கிமிக்குகள் இல்லை, சுயவிவர பரிசீலனையைத் தாண்டும் சுருக்கப்பாதைகள் இல்லை.",
+          learnAbout: "AV பற்றி அறிக",
+          visitHelp: "உதவி மையத்துக்கு செல்லவும்",
+          journeyTitle: "நிலையான உறவுக்கான உங்கள் பயணம்",
+          journeyDescription: "தெளிவு, நம்பிக்கை, மற்றும் திருமணத்திற்கான சீரிய பாதையை விரும்பும் குடும்பங்களுக்கான நான்கு தெளிவான படிகள்.",
+          learnProcess: "எங்கள் செயல்முறையை மேலும் அறிக",
+          differenceLabel: "எங்கள் வித்தியாசம்",
+          differenceTitle: "ஏன் AV தமிழ் மேட்ரிமோனி",
+          differenceDescription: "அனுபவத்தின் ஒவ்வொரு பகுதியும் நம்பிக்கை, சீரிய நோக்கம், மற்றும் நீண்டகால குடும்ப பொருத்தத்திற்காக அமைக்கப்பட்டுள்ளது.",
+          realConnectionsLabel: "உண்மையான இணைப்புகள்",
+          realConnectionsDescription: "உண்மையான ஜோடிகள், உண்மையான குடும்ப நம்பிக்கை, மற்றும் சத்தமல்லாமல் பொருத்தத்தை மையமாகக் கொண்ட கதைகள்.",
+          readSuccessStories: "மேலும் வெற்றிக் கதைகளை வாசிக்கவும்",
+        }
+      : {
+          trustLabel: "Trusted by 50,000+ Tamil families",
+          exploreProcess: "Explore the process",
+          heroChips: [
+            "Verified profiles before visibility",
+            "Family-first introductions and support",
+            "Tamil community focus across regions",
+          ],
+          whyLabel: "Why families choose AV",
+          whyTitle: "A calmer, more intentional match journey",
+          storyLabel: "A recent success story",
+          readStories: "Read more stories",
+          qualityLabel: "Designed for quality",
+          qualityTitle: "Built for trust, not noise.",
+          qualityDescription: "No swipe-heavy distractions, no noisy gimmicks, and no shortcuts around profile review.",
+          learnAbout: "Learn about AV",
+          visitHelp: "Visit help center",
+          journeyTitle: "Your Journey to Forever",
+          journeyDescription: "Four clear steps, shaped for families who want clarity, trust, and a serious path to marriage.",
+          learnProcess: "Learn more about our process",
+          differenceLabel: "Our difference",
+          differenceTitle: "Why AV Tamil Matrimony",
+          differenceDescription: "Every part of the experience is tuned for trust, seriousness, and long-term family fit.",
+          realConnectionsLabel: "Real connections",
+          realConnectionsDescription: "Real couples, real family trust, and stories shaped by compatibility instead of noise.",
+          readSuccessStories: "Read more success stories",
+        };
 
   const stats = [
     { icon: Users, value: '50K+', label: t('active_profiles') },
@@ -46,25 +102,25 @@ export function Home({ viewer }: HomeProps) {
   const stories = [
     {
       quote: t('story_1_quote'),
-      names: 'Priya & Karthik',
-      location: 'Chennai, 2025',
+      names: language === "ta" ? "ப்ரியா & கார்த்திக்" : 'Priya & Karthik',
+      location: language === "ta" ? "சென்னை, 2025" : 'Chennai, 2025',
     },
     {
       quote: t('story_2_quote'),
-      names: 'Lakshmi & Raj',
-      location: 'Coimbatore, 2026',
+      names: language === "ta" ? "லட்சுமி & ராஜ்" : 'Lakshmi & Raj',
+      location: language === "ta" ? "கோயம்புத்தூர், 2026" : 'Coimbatore, 2026',
     },
     {
       quote: t('story_3_quote'),
-      names: 'Divya & Arun',
-      location: 'Singapore, 2025',
+      names: language === "ta" ? "திவ்யா & அருண்" : 'Divya & Arun',
+      location: language === "ta" ? "சிங்கப்பூர், 2025" : 'Singapore, 2025',
     },
   ];
 
   return (
     <PageTransition>
       <div className="page-shell">
-        <Header activeLink="home" viewer={viewer} />
+        <AppHeader mode="public" activeLink="home" viewer={viewer} />
 
         <section className="section-shell section-block pt-4 md:pt-6 lg:pt-8">
           <div className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1.08fr)_minmax(20rem,0.92fr)]">
@@ -79,7 +135,7 @@ export function Home({ viewer }: HomeProps) {
                   className="eyebrow-pill"
                 >
                   <AnimatedHeartIcon className="h-3.5 w-3.5" active />
-                  <span>Trusted by 50,000+ Tamil families</span>
+                  <span>{copy.trustLabel}</span>
                 </motion.div>
 
                 <motion.h1
@@ -118,7 +174,7 @@ export function Home({ viewer }: HomeProps) {
                     onClick={() => router.push("/how-it-works")}
                     className="btn-secondary px-6 py-3.5 text-base"
                   >
-                    Explore the process
+                    {copy.exploreProcess}
                   </button>
                 </motion.div>
 
@@ -128,11 +184,7 @@ export function Home({ viewer }: HomeProps) {
                   transition={{ duration: 0.5, delay: 0.46 }}
                   className="mt-10 grid gap-3 sm:grid-cols-3"
                 >
-                  {[
-                    "Verified profiles before visibility",
-                    "Family-first introductions and support",
-                    "Tamil community focus across regions",
-                  ].map((item) => (
+                  {copy.heroChips.map((item) => (
                     <div
                       key={item}
                       className="rounded-[1.35rem] border border-[#B91C1C]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(250,245,237,0.92))] px-4 py-4 shadow-[0_14px_28px_rgba(15,23,42,0.04)]"
@@ -154,8 +206,8 @@ export function Home({ viewer }: HomeProps) {
               <div className="panel-surface flex h-full flex-col p-5 md:p-6">
                 <div className="flex items-start justify-between gap-3">
                   <div className="max-w-sm">
-                    <div className="section-label">Why families choose AV</div>
-                    <h2 className="mt-2 text-2xl text-slate-900 md:text-3xl">A calmer, more intentional match journey</h2>
+                    <div className="section-label">{copy.whyLabel}</div>
+                    <h2 className="mt-2 text-2xl text-slate-900 md:text-3xl">{copy.whyTitle}</h2>
                   </div>
                   <div className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-[#B91C1C] text-white shadow-[0_18px_34px_rgba(185,28,28,0.18)] sm:flex">
                     <AnimatedHeartIcon className="h-5 w-5" active />
@@ -177,7 +229,7 @@ export function Home({ viewer }: HomeProps) {
               </div>
 
               <div className="panel-surface p-5 md:p-6">
-                <div className="section-label">A recent success story</div>
+                <div className="section-label">{copy.storyLabel}</div>
                 <div className="mt-3 text-xl text-slate-900 md:text-2xl" style={{ fontFamily: "var(--font-display)" }}>
                   {stories[0]?.names}
                 </div>
@@ -190,7 +242,7 @@ export function Home({ viewer }: HomeProps) {
                     onClick={() => router.push("/stories")}
                     className="link-brand inline-flex items-center gap-2 text-sm"
                   >
-                    Read more stories
+                    {copy.readStories}
                     <ArrowRight className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -231,25 +283,25 @@ export function Home({ viewer }: HomeProps) {
             </div>
 
             <div className="panel-muted p-5 md:p-6">
-              <div className="section-label">Designed for quality</div>
+              <div className="section-label">{copy.qualityLabel}</div>
               <h2 className="mt-2 text-2xl text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
-                Built for trust, not noise.
+                {copy.qualityTitle}
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                No swipe-heavy distractions, no noisy gimmicks, and no shortcuts around profile review.
+                {copy.qualityDescription}
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <button
                   onClick={() => router.push("/about")}
                   className="btn-secondary px-4 py-2.5 text-sm"
                 >
-                  Learn about AV
+                  {copy.learnAbout}
                 </button>
                 <button
                   onClick={() => router.push("/help")}
                   className="btn-ghost px-4 py-2.5 text-sm"
                 >
-                  Visit help center
+                  {copy.visitHelp}
                 </button>
               </div>
             </div>
@@ -267,10 +319,10 @@ export function Home({ viewer }: HomeProps) {
             >
               <span className="section-label">{t("home.how.it.works.title")}</span>
               <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
-                Your Journey to Forever
+                {copy.journeyTitle}
               </h2>
               <p className="mt-3 text-sm text-slate-500 md:text-base">
-                Four clear steps, shaped for families who want clarity, trust, and a serious path to marriage.
+                {copy.journeyDescription}
               </p>
             </motion.div>
 
@@ -313,7 +365,7 @@ export function Home({ viewer }: HomeProps) {
                 onClick={() => router.push("/how-it-works")}
                 className="btn-secondary"
               >
-                Learn more about our process
+                {copy.learnProcess}
               </button>
             </motion.div>
           </div>
@@ -327,12 +379,12 @@ export function Home({ viewer }: HomeProps) {
             transition={{ duration: 0.5 }}
             className="mx-auto max-w-2xl text-center"
           >
-            <span className="section-label">Our difference</span>
+            <span className="section-label">{copy.differenceLabel}</span>
             <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
-              Why AV Tamil Matrimony
+              {copy.differenceTitle}
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-slate-500 md:text-base">
-              Every part of the experience is tuned for trust, seriousness, and long-term family fit.
+              {copy.differenceDescription}
             </p>
           </motion.div>
 
@@ -368,12 +420,12 @@ export function Home({ viewer }: HomeProps) {
               transition={{ duration: 0.5 }}
               className="mx-auto max-w-2xl text-center"
             >
-              <span className="section-label">Real connections</span>
+              <span className="section-label">{copy.realConnectionsLabel}</span>
               <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
                 {t("header.success.stories")}
               </h2>
               <p className="mt-3 text-sm text-slate-500 md:text-base">
-                Real couples, real family trust, and stories shaped by compatibility instead of noise.
+                {copy.realConnectionsDescription}
               </p>
             </motion.div>
 
@@ -412,7 +464,7 @@ export function Home({ viewer }: HomeProps) {
                 onClick={() => router.push("/stories")}
                 className="btn-secondary"
               >
-                Read more success stories
+                {copy.readSuccessStories}
               </button>
             </motion.div>
           </div>

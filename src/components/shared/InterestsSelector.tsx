@@ -5,6 +5,8 @@ import { Check, ChevronDown, Sparkles, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { INTEREST_CATEGORIES } from "@/lib/constants/interests";
+import { useLanguage } from "@/providers/LanguageProvider";
+import { translateInterestCategory, translateInterestLabel } from "@/lib/translate-display";
 
 interface InterestsSelectorProps {
   selectedInterests?: string[];
@@ -19,6 +21,7 @@ export function InterestsSelector({
   showSaveButton = false,
   maxSelections = 15,
 }: InterestsSelectorProps) {
+  const { language } = useLanguage();
   const [selected, setSelected] = useState<string[]>(selectedInterests);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(
     INTEREST_CATEGORIES[0]?.id ?? null,
@@ -45,7 +48,11 @@ export function InterestsSelector({
     }
 
     if (selected.length >= maxSelections) {
-      toast.error(`You can select up to ${maxSelections} interests.`);
+      toast.error(
+        language === "ta"
+          ? `அதிகபட்சம் ${maxSelections} விருப்பங்களை மட்டும் தேர்வு செய்யலாம்.`
+          : `You can select up to ${maxSelections} interests.`,
+      );
       return;
     }
 
@@ -61,9 +68,13 @@ export function InterestsSelector({
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-xl text-slate-900">Selected interests</h3>
+              <h3 className="text-xl text-slate-900">
+                {language === "ta" ? "தேர்ந்தெடுத்த விருப்பங்கள்" : "Selected interests"}
+              </h3>
               <p className="text-sm text-slate-600">
-                Choose a concise set of interests that represents your lifestyle and personality.
+                {language === "ta"
+                  ? "உங்கள் வாழ்க்கை முறை மற்றும் குணநலன்களை பிரதிபலிக்கும் சுருக்கமான விருப்பங்களைத் தேர்ந்தெடுக்கவும்."
+                  : "Choose a concise set of interests that represents your lifestyle and personality."}
               </p>
             </div>
           </div>
@@ -74,7 +85,9 @@ export function InterestsSelector({
 
         {selected.length === 0 ? (
           <div className="mt-6 rounded-2xl border border-dashed border-slate-200 px-5 py-8 text-center text-sm text-slate-500">
-            No interests selected yet. Choose from {totalAvailable} available options below.
+            {language === "ta"
+              ? `இன்னும் எந்த விருப்பமும் தேர்ந்தெடுக்கப்படவில்லை. கீழே உள்ள ${totalAvailable} விருப்பங்களில் இருந்து தேர்வு செய்யவும்.`
+              : `No interests selected yet. Choose from ${totalAvailable} available options below.`}
           </div>
         ) : (
           <div className="mt-6 flex flex-wrap gap-2">
@@ -85,7 +98,7 @@ export function InterestsSelector({
                 onClick={() => toggleInterest(interest)}
                 className="inline-flex items-center gap-2 rounded-full border border-[#B91C1C]/20 bg-[#B91C1C]/8 px-4 py-2 text-sm text-[#991B1B] transition-colors hover:bg-[#B91C1C]/12"
               >
-                <span>{interest}</span>
+                <span>{translateInterestLabel(interest, language)}</span>
                 <X className="h-4 w-4" />
               </button>
             ))}
@@ -106,8 +119,12 @@ export function InterestsSelector({
                 className="flex w-full items-center justify-between px-5 py-4 text-left"
               >
                 <div>
-                  <div className="text-base text-slate-900">{category.label}</div>
-                  <div className="mt-1 text-xs text-slate-500">{categoryCount} selected</div>
+                  <div className="text-base text-slate-900">
+                    {translateInterestCategory(category.label, language)}
+                  </div>
+                  <div className="mt-1 text-xs text-slate-500">
+                    {language === "ta" ? `${categoryCount} தேர்வு செய்யப்பட்டது` : `${categoryCount} selected`}
+                  </div>
                 </div>
                 <motion.div animate={{ rotate: open ? 180 : 0 }}>
                   <ChevronDown className="h-5 w-5 text-slate-400" />
@@ -137,7 +154,7 @@ export function InterestsSelector({
                                 : "border-slate-200 bg-white text-slate-700 hover:border-[#B91C1C]/20 hover:bg-[#FBF7F0]"
                             }`}
                           >
-                            <span>{item.label}</span>
+                            <span>{translateInterestLabel(item.label, language)}</span>
                             {active ? <Check className="h-4 w-4" /> : null}
                           </button>
                         );
@@ -153,7 +170,9 @@ export function InterestsSelector({
 
       {showSaveButton ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-5 py-4 text-center text-sm text-slate-500">
-          Changes are saved when you submit your profile.
+          {language === "ta"
+            ? "உங்கள் சுயவிவரத்தை சமர்ப்பிக்கும் போது மாற்றங்கள் சேமிக்கப்படும்."
+            : "Changes are saved when you submit your profile."}
         </div>
       ) : null}
     </div>

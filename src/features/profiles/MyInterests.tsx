@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Heart, Phone, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { AuthHeader } from "@/components/layout/AuthHeader";
+import { AppHeader } from "@/components/layout/AppHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { requestJson } from "@/lib/client-request";
+import { translateDisplayValue } from "@/lib/translate-display";
+import { useLanguage } from "@/providers/LanguageProvider";
 import type { InterestItem, SessionViewer } from "@/types/domain";
 
 interface MyInterestsProps {
@@ -18,6 +20,7 @@ interface MyInterestsProps {
 
 export function MyInterests({ viewer, interests }: MyInterestsProps) {
   const router = useRouter();
+  const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState<"sent" | "received">("sent");
   const [processingId, setProcessingId] = useState<string | null>(null);
 
@@ -35,14 +38,14 @@ export function MyInterests({ viewer, interests }: MyInterestsProps) {
       });
       toast.success(
         action === "accept"
-          ? "Interest accepted."
+          ? language === "ta" ? "ஆர்வம் ஏற்கப்பட்டது." : "Interest accepted."
           : action === "decline"
-            ? "Interest declined."
-            : "Interest withdrawn.",
+            ? language === "ta" ? "ஆர்வம் நிராகரிக்கப்பட்டது." : "Interest declined."
+            : language === "ta" ? "ஆர்வம் திரும்பப் பெறப்பட்டது." : "Interest withdrawn.",
       );
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to update interest request.");
+      toast.error(error instanceof Error ? error.message : language === "ta" ? "ஆர்வக் கோரிக்கையை புதுப்பிக்க முடியவில்லை." : "Unable to update interest request.");
     } finally {
       setProcessingId(null);
     }
@@ -53,21 +56,24 @@ export function MyInterests({ viewer, interests }: MyInterestsProps) {
   return (
     <PageTransition>
       <div className="page-shell">
-        <AuthHeader viewer={viewer} backTo="/dashboard" backLabel="Dashboard" />
+        <AppHeader mode="member" activeLink="interests" viewer={viewer} />
 
         <div className="section-shell section-block pt-4 md:pt-6">
           <section className="hero-surface p-6 md:p-8">
-            <span className="section-label">Connection workflow</span>
-            <h1 className="mt-3 text-4xl text-slate-900 md:text-5xl" style={{ fontFamily: "var(--font-display)" }}>My interests</h1>
+            <span className="section-label">{language === "ta" ? "இணைப்பு நடைமுறை" : "Connection workflow"}</span>
+            <h1 className="mt-3 text-4xl text-slate-900 md:text-5xl" style={{ fontFamily: "var(--font-display)" }}>
+              {language === "ta" ? "எனது ஆர்வங்கள்" : "My interests"}
+            </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
-              Track incoming and outgoing interest requests, then review shared contact details
-              once the administrator releases them.
+              {language === "ta"
+                ? "வரும் மற்றும் செல்லும் ஆர்வக் கோரிக்கைகளை கண்காணித்து, நிர்வாகி வெளியிட்டபின் பகிரப்பட்ட தொடர்பு விவரங்களைப் பார்வையிடுங்கள்."
+                : "Track incoming and outgoing interest requests, then review shared contact details once the administrator releases them."}
             </p>
 
             <div className="mt-8 grid gap-4 md:grid-cols-3">
-              <Metric title="Sent" value={sentInterests.length} />
-              <Metric title="Received" value={receivedInterests.length} />
-              <Metric title="Contacts shared" value={sharedContacts.length} />
+              <Metric title={language === "ta" ? "அனுப்பியது" : "Sent"} value={sentInterests.length} />
+              <Metric title={language === "ta" ? "பெற்றது" : "Received"} value={receivedInterests.length} />
+              <Metric title={language === "ta" ? "பகிரப்பட்ட தொடர்புகள்" : "Contacts shared"} value={sharedContacts.length} />
             </div>
           </section>
 
@@ -78,25 +84,27 @@ export function MyInterests({ viewer, interests }: MyInterestsProps) {
                 className="tab-chip"
                 data-active={activeTab === "sent"}
               >
-                Sent ({sentInterests.length})
+                {language === "ta" ? `அனுப்பியது (${sentInterests.length})` : `Sent (${sentInterests.length})`}
               </button>
               <button
                 onClick={() => setActiveTab("received")}
                 className="tab-chip"
                 data-active={activeTab === "received"}
               >
-                Received ({receivedInterests.length})
+                {language === "ta" ? `பெற்றது (${receivedInterests.length})` : `Received (${receivedInterests.length})`}
               </button>
             </div>
 
             <div className="mt-6">
               {currentList.length === 0 ? (
                 <EmptyState
-                  title={activeTab === "sent" ? "No sent interests yet" : "No received interests yet"}
+                  title={activeTab === "sent"
+                    ? language === "ta" ? "இன்னும் அனுப்பிய ஆர்வங்கள் இல்லை" : "No sent interests yet"
+                    : language === "ta" ? "இன்னும் பெற்ற ஆர்வங்கள் இல்லை" : "No received interests yet"}
                   description={
                     activeTab === "sent"
-                      ? "Browse verified member profiles and send your first interest request."
-                      : "Incoming requests will appear here once another verified member reaches out."
+                      ? language === "ta" ? "சரிபார்க்கப்பட்ட உறுப்பினர் சுயவிவரங்களைப் பார்வையிட்டு உங்கள் முதல் ஆர்வக் கோரிக்கையை அனுப்புங்கள்." : "Browse verified member profiles and send your first interest request."
+                      : language === "ta" ? "மற்றொரு சரிபார்க்கப்பட்ட உறுப்பினர் தொடர்புகொண்டதும் வரவான கோரிக்கைகள் இங்கே தோன்றும்." : "Incoming requests will appear here once another verified member reaches out."
                   }
                   icon={Heart}
                   action={
@@ -105,7 +113,7 @@ export function MyInterests({ viewer, interests }: MyInterestsProps) {
                         onClick={() => router.push("/search")}
                         className="btn-primary"
                       >
-                        Search Profiles
+                        {language === "ta" ? "சுயவிவரங்கள் தேடவும்" : "Search Profiles"}
                       </button>
                     ) : undefined
                   }
@@ -135,18 +143,19 @@ export function MyInterests({ viewer, interests }: MyInterestsProps) {
                             />
                           </div>
                           <p className="mt-2 text-sm text-slate-600">
-                            {interest.counterpart.age} years • {interest.counterpart.city} •{" "}
-                            {interest.counterpart.occupation}
+                            {interest.counterpart.age} {language === "ta" ? "வயது" : "years"} •{" "}
+                            {translateDisplayValue(interest.counterpart.city, language)} •{" "}
+                            {translateDisplayValue(interest.counterpart.occupation, language)}
                           </p>
                           {interest.contactDetails ? (
                             <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-700">
                               <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
                                 <Phone className="h-4 w-4 text-emerald-600" />
-                                {interest.contactDetails.phone ?? "No phone"}
+                                {interest.contactDetails.phone ?? (language === "ta" ? "தொலைபேசி இல்லை" : "No phone")}
                               </span>
                               <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
                                 <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                                {interest.contactDetails.email ?? "No email"}
+                                {interest.contactDetails.email ?? (language === "ta" ? "மின்னஞ்சல் இல்லை" : "No email")}
                               </span>
                             </div>
                           ) : null}
@@ -157,7 +166,7 @@ export function MyInterests({ viewer, interests }: MyInterestsProps) {
                             onClick={() => router.push(`/profile/${interest.counterpart.userId}`)}
                             className="btn-secondary px-3 py-2 text-xs"
                           >
-                            View Profile
+                            {language === "ta" ? "சுயவிவரத்தை காண்க" : "View Profile"}
                           </button>
 
                           {interest.direction === "received" && interest.status === "PENDING" ? (
@@ -167,14 +176,14 @@ export function MyInterests({ viewer, interests }: MyInterestsProps) {
                                 disabled={processingId === interest.id}
                                 className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
                               >
-                                Accept
+                                {language === "ta" ? "ஏற்கவும்" : "Accept"}
                               </button>
                               <button
                                 onClick={() => handleAction(interest.id, "decline")}
                                 disabled={processingId === interest.id}
                                 className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-slate-900 disabled:opacity-60"
                               >
-                                Decline
+                                {language === "ta" ? "நிராகரி" : "Decline"}
                               </button>
                             </>
                           ) : null}
@@ -186,7 +195,7 @@ export function MyInterests({ viewer, interests }: MyInterestsProps) {
                               className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-slate-900 disabled:opacity-60"
                             >
                               <XCircle className="h-4 w-4" />
-                              <span>Withdraw</span>
+                              <span>{language === "ta" ? "திரும்பப் பெறு" : "Withdraw"}</span>
                             </button>
                           ) : null}
                         </div>

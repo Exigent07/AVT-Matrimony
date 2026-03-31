@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ZodError } from "zod";
 import { getCurrentViewer } from "@/server/auth";
 import { AppError, getErrorMessage } from "@/server/errors";
 
@@ -17,6 +18,25 @@ export async function requireApiViewer(role?: "MEMBER" | "ADMIN") {
 }
 
 export function apiError(error: unknown) {
+  if (error instanceof ZodError) {
+    const firstIssue = error.issues[0];
+    const fieldErrors = Object.fromEntries(
+      error.issues
+        .filter((issue) => issue.path.length > 0)
+        .map((issue) => [issue.path.join("."), issue.message]),
+    );
+
+    return NextResponse.json(
+      {
+        error: firstIssue?.message ?? "Please review the highlighted fields.",
+        fieldErrors,
+      },
+      {
+        status: 400,
+      },
+    );
+  }
+
   const statusCode =
     error instanceof AppError
       ? error.statusCode

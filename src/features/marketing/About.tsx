@@ -1,6 +1,6 @@
 "use client";
 
-import { Header } from '@/components/layout/Header';
+import { AppHeader } from "@/components/layout/AppHeader";
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { AnimatedHeartIcon } from '@/components/shared/AnimatedHeartIcon';
 import { PageTransition } from '@/components/shared/PageTransition';
@@ -16,42 +16,58 @@ interface AboutProps {
 
 export function About({ viewer }: AboutProps) {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const copy =
+    language === "ta"
+      ? {
+          badge: "எங்களை பற்றி",
+          missionParagraphOne: "தமிழ் குடும்பங்கள் பாரம்பரியத்தை மதிக்கும், அதே நேரத்தில் நவீன வசதியையும் ஏற்றுக்கொள்ளும் ஒரு தளத்தின் மூலம் பொருத்தமான இணைப்புகளைப் பெற உதவுவது எங்கள் நோக்கம். திருமணத்தின் புனிதத்தையும் குடும்பத்தின் முக்கியத்துவத்தையும் நாங்கள் நம்புகிறோம்.",
+          missionParagraphTwo: "எங்கள் தளத்தில் உள்ள ஒவ்வொரு சுயவிவரமும் சரிபார்க்கப்பட்டது, ஒவ்வொரு இணைப்பும் அர்த்தமுள்ளதாகும், ஒவ்வொரு வெற்றிக் கதையும் எங்கள் சமூகத்திற்கான அர்ப்பணிப்பை வலுப்படுத்துகிறது.",
+          principlesLabel: "எங்கள் கொள்கைகள்",
+          storyLabel: "எங்கள் கதை",
+        }
+      : {
+          badge: "About us",
+          missionParagraphOne: "Our mission is to help Tamil families find compatible matches through a platform that respects tradition while embracing modern convenience. We believe in the sanctity of marriage and the importance of family in the matchmaking process.",
+          missionParagraphTwo: "Every profile on our platform is verified, every connection is meaningful, and every success story strengthens our commitment to serving our community.",
+          principlesLabel: "Our principles",
+          storyLabel: "Our story",
+        };
 
   const values = [
     {
       icon: Heart,
-      title: 'Family-Centered Approach',
-      description: 'We understand that marriage is about families, not just individuals. Every connection honors tradition and family values.',
+      title: language === "ta" ? 'குடும்ப மைய அணுகுமுறை' : 'Family-Centered Approach',
+      description: language === "ta" ? 'திருமணம் என்பது தனிநபர்களைப் பற்றியது மட்டுமல்ல, குடும்பங்களையும் பற்றியது என்பதை நாங்கள் புரிந்துகொள்கிறோம். ஒவ்வொரு இணைப்பும் பாரம்பரியத்தையும் குடும்ப மதிப்புகளையும் மதிக்கிறது.' : 'We understand that marriage is about families, not just individuals. Every connection honors tradition and family values.',
     },
     {
       icon: Shield,
-      title: 'Trust & Security',
-      description: 'Every profile is personally verified by our team before going live. No fake accounts, only genuine people.',
+      title: language === "ta" ? 'நம்பிக்கை மற்றும் பாதுகாப்பு' : 'Trust & Security',
+      description: language === "ta" ? 'ஒவ்வொரு சுயவிவரமும் பொதுவில் காண்பிக்கப்படும் முன் எங்கள் குழுவால் தனிப்பட்ட முறையில் சரிபார்க்கப்படுகிறது. போலி கணக்குகள் இல்லை, உண்மையான நபர்கள் மட்டுமே.' : 'Every profile is personally verified by our team before going live. No fake accounts, only genuine people.',
     },
     {
       icon: Users,
-      title: 'Community Focus',
-      description: 'Serving Tamil communities across India and abroad, with deep respect for Tamil culture and traditions.',
+      title: language === "ta" ? 'சமூக கவனம்' : 'Community Focus',
+      description: language === "ta" ? 'இந்தியாவிலும் வெளிநாடுகளிலும் உள்ள தமிழ் சமூகங்களுக்கு தமிழ் கலாசாரம் மற்றும் பாரம்பரியங்களுக்கு ஆழ்ந்த மரியாதையுடன் சேவை செய்கிறோம்.' : 'Serving Tamil communities across India and abroad, with deep respect for Tamil culture and traditions.',
     },
     {
       icon: Target,
-      title: 'Meaningful Connections',
-      description: 'No algorithm tricks. No swipe culture. Just honest profiles and meaningful connections that lead to marriage.',
+      title: language === "ta" ? 'அர்த்தமுள்ள இணைப்புகள்' : 'Meaningful Connections',
+      description: language === "ta" ? 'அல்காரிதம் தந்திரங்கள் இல்லை. ஸ்வைப் கலாச்சாரம் இல்லை. நேர்மையான சுயவிவரங்கள் மற்றும் திருமணத்துக்கு வழிவகுக்கும் அர்த்தமுள்ள இணைப்புகள் மட்டுமே.' : 'No algorithm tricks. No swipe culture. Just honest profiles and meaningful connections that lead to marriage.',
     },
   ];
 
   const stats = [
-    { value: '50,000+', label: 'Active Profiles' },
-    { value: '2,500+', label: 'Success Stories' },
-    { value: '100%', label: 'Verified Profiles' },
-    { value: '95%', label: 'Match Rate' },
+    { value: '50,000+', label: language === "ta" ? 'செயலில் உள்ள சுயவிவரங்கள்' : 'Active Profiles' },
+    { value: '2,500+', label: language === "ta" ? 'வெற்றிக் கதைகள்' : 'Success Stories' },
+    { value: '100%', label: language === "ta" ? 'சரிபார்க்கப்பட்ட சுயவிவரங்கள்' : 'Verified Profiles' },
+    { value: '95%', label: language === "ta" ? 'பொருத்த விகிதம்' : 'Match Rate' },
   ];
 
   return (
     <PageTransition>
       <div className="page-shell">
-        <Header activeLink="about" viewer={viewer} />
+        <AppHeader mode="public" activeLink="about" viewer={viewer} />
 
         <section className="section-shell section-block pt-4 md:pt-6">
           <div className="hero-surface p-6 text-center md:p-10 lg:p-12">
@@ -60,7 +76,7 @@ export function About({ viewer }: AboutProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <span className="eyebrow-pill">About us</span>
+              <span className="eyebrow-pill">{copy.badge}</span>
               <h1 className="mt-5 text-4xl text-slate-900 md:text-5xl lg:text-[4rem]" style={{ fontFamily: "var(--font-display)" }}>
                 {t("about.title")}
               </h1>
@@ -95,13 +111,10 @@ export function About({ viewer }: AboutProps) {
                     {t("about.mission.title")}
                   </h2>
                   <p className="mt-4 text-base leading-relaxed text-slate-600">
-                    Our mission is to help Tamil families find compatible matches through a platform
-                    that respects tradition while embracing modern convenience. We believe in the
-                    sanctity of marriage and the importance of family in the matchmaking process.
+                    {copy.missionParagraphOne}
                   </p>
                   <p className="mt-4 text-base leading-relaxed text-slate-600">
-                    Every profile on our platform is verified, every connection is meaningful, and
-                    every success story strengthens our commitment to serving our community.
+                    {copy.missionParagraphTwo}
                   </p>
                 </div>
                 <div className="flex items-center justify-center">
@@ -115,7 +128,7 @@ export function About({ viewer }: AboutProps) {
 
         <section className="section-shell section-block">
           <div className="mb-10 text-center md:mb-14">
-            <span className="section-label">Our principles</span>
+            <span className="section-label">{copy.principlesLabel}</span>
             <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
               {t("about.values.title")}
             </h2>
@@ -150,7 +163,7 @@ export function About({ viewer }: AboutProps) {
         <section className="section-shell section-block pt-0">
           <div className="panel-surface p-6 md:p-8 lg:p-10">
             <div className="mb-10 text-center md:mb-14">
-              <span className="section-label">Our story</span>
+              <span className="section-label">{copy.storyLabel}</span>
               <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
                 {t("about.journey.title")}
               </h2>
@@ -161,10 +174,26 @@ export function About({ viewer }: AboutProps) {
 
             <div className="space-y-4 md:space-y-6">
               {[
-                { year: "2015", title: "Foundation", desc: "AV Tamil Matrimony was founded with a vision to serve Tamil families" },
-                { year: "2018", title: "10,000 Members", desc: "Reached our first major milestone with 10,000 active profiles" },
-                { year: "2021", title: "Global Expansion", desc: "Expanded services to Tamil communities in USA, UK, Singapore, and Australia" },
-                { year: "2026", title: "50,000+ Success", desc: "Celebrating 50,000+ active profiles and 2,500+ successful marriages" },
+                {
+                  year: "2015",
+                  title: language === "ta" ? "அடித்தளம்" : "Foundation",
+                  desc: language === "ta" ? "தமிழ் குடும்பங்களுக்கு சேவை செய்வதற்கான நோக்கத்துடன் AV தமிழ் மேட்ரிமோனி தொடங்கப்பட்டது" : "AV Tamil Matrimony was founded with a vision to serve Tamil families",
+                },
+                {
+                  year: "2018",
+                  title: language === "ta" ? "10,000 உறுப்பினர்கள்" : "10,000 Members",
+                  desc: language === "ta" ? "10,000 செயலில் உள்ள சுயவிவரங்களுடன் எங்கள் முதல் முக்கிய இலக்கை எட்டினோம்" : "Reached our first major milestone with 10,000 active profiles",
+                },
+                {
+                  year: "2021",
+                  title: language === "ta" ? "உலகளாவிய விரிவு" : "Global Expansion",
+                  desc: language === "ta" ? "அமெரிக்கா, இங்கிலாந்து, சிங்கப்பூர், மற்றும் ஆஸ்திரேலியாவில் உள்ள தமிழ் சமூகங்களுக்கு சேவைகளை விரிவுபடுத்தினோம்" : "Expanded services to Tamil communities in USA, UK, Singapore, and Australia",
+                },
+                {
+                  year: "2026",
+                  title: language === "ta" ? "50,000+ வெற்றி" : "50,000+ Success",
+                  desc: language === "ta" ? "50,000+ செயலில் உள்ள சுயவிவரங்களையும் 2,500+ வெற்றிகரமான திருமணங்களையும் கொண்டாடுகிறோம்" : "Celebrating 50,000+ active profiles and 2,500+ successful marriages",
+                },
               ].map((item) => (
                 <div key={item.year} className="flex items-start gap-4 md:gap-6 md:items-center">
                   <div className="w-16 shrink-0 text-right md:w-24">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Header } from '@/components/layout/Header';
+import { AppHeader } from "@/components/layout/AppHeader";
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { AnimatedHeartIcon } from '@/components/shared/AnimatedHeartIcon';
 import { PageTransition } from '@/components/shared/PageTransition';
@@ -16,7 +16,7 @@ interface HowItWorksProps {
 
 export function HowItWorks({ viewer }: HowItWorksProps) {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const steps = [
     {
@@ -24,55 +24,83 @@ export function HowItWorks({ viewer }: HowItWorksProps) {
       title: t('howitworks.step1.title'),
       icon: User,
       description: t('howitworks.step1.desc'),
-      features: [
-        'Fill in personal and family details',
-        'Add education and career information',
-        'Specify partner preferences',
-        'Upload photos (optional)',
-      ],
+      features: language === "ta"
+        ? [
+            'தனிப்பட்ட மற்றும் குடும்ப விவரங்களை நிரப்பவும்',
+            'கல்வி மற்றும் தொழில் தகவல்களைச் சேர்க்கவும்',
+            'இணைவர் விருப்பங்களை குறிப்பிடவும்',
+            'புகைப்படங்களைப் பதிவேற்றவும் (விருப்பம்)',
+          ]
+        : [
+            'Fill in personal and family details',
+            'Add education and career information',
+            'Specify partner preferences',
+            'Upload photos (optional)',
+          ],
     },
     {
       number: 2,
       title: t('howitworks.step2.title'),
       icon: Search,
       description: t('howitworks.step2.desc'),
-      features: [
-        'Use advanced filters (age, location, caste, etc.)',
-        'View detailed profiles',
-        'See compatibility scores',
-        'Save profiles for later',
-      ],
+      features: language === "ta"
+        ? [
+            'மேம்பட்ட வடிகட்டிகளைப் பயன்படுத்தவும் (வயது, இடம், சாதி போன்றவை)',
+            'விரிவான சுயவிவரங்களைப் பார்க்கவும்',
+            'பொருத்த மதிப்பெண்களைப் பார்க்கவும்',
+            'பின்னர் பார்க்க சுயவிவரங்களைச் சேமிக்கவும்',
+          ]
+        : [
+            'Use advanced filters (age, location, caste, etc.)',
+            'View detailed profiles',
+            'See compatibility scores',
+            'Save profiles for later',
+          ],
     },
     {
       number: 3,
       title: t('howitworks.step3.title'),
       icon: Heart,
       description: t('howitworks.step3.desc'),
-      features: [
-        'Send and receive interest requests',
-        'Chat with matched profiles',
-        'Share contact details',
-        'Schedule meetings',
-      ],
+      features: language === "ta"
+        ? [
+            'ஆர்வக் கோரிக்கைகளை அனுப்பவும் மற்றும் பெறவும்',
+            'பொருந்திய சுயவிவரங்களுடன் உரையாடவும்',
+            'தொடர்பு விவரங்களைப் பகிரவும்',
+            'சந்திப்புகளை திட்டமிடவும்',
+          ]
+        : [
+            'Send and receive interest requests',
+            'Chat with matched profiles',
+            'Share contact details',
+            'Schedule meetings',
+          ],
     },
     {
       number: 4,
       title: t('howitworks.step4.title'),
       icon: Sparkles,
       description: t('howitworks.step4.desc'),
-      features: [
-        'Family introductions',
-        'In-person meetings',
-        'Traditional matchmaking support',
-        'Wedding planning guidance',
-      ],
+      features: language === "ta"
+        ? [
+            'குடும்ப அறிமுகங்கள்',
+            'நேரடி சந்திப்புகள்',
+            'பாரம்பரிய பொருத்த ஆதரவு',
+            'திருமண திட்டமிடல் வழிகாட்டுதல்',
+          ]
+        : [
+            'Family introductions',
+            'In-person meetings',
+            'Traditional matchmaking support',
+            'Wedding planning guidance',
+          ],
     },
   ];
 
   return (
     <PageTransition>
       <div className="page-shell">
-        <Header activeLink="how-it-works" viewer={viewer} />
+        <AppHeader mode="public" activeLink="how-it-works" viewer={viewer} />
 
         <section className="section-shell section-block pt-4 md:pt-6">
           <div className="hero-surface p-6 text-center md:p-10 lg:p-12">
@@ -93,7 +121,9 @@ export function HowItWorks({ viewer }: HowItWorksProps) {
             <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {steps.map((step) => (
                 <div key={step.number} className="panel-muted p-4 text-left">
-                  <div className="section-label">Step {step.number}</div>
+                  <div className="section-label">
+                    {language === "ta" ? `படி ${step.number}` : `Step ${step.number}`}
+                  </div>
                   <div className="mt-2 text-lg text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
                     {step.title}
                   </div>
@@ -130,7 +160,9 @@ export function HowItWorks({ viewer }: HowItWorksProps) {
                         {step.number}
                       </div>
                       <div className="relative">
-                        <span className="section-label">STEP {step.number} OF 4</span>
+                        <span className="section-label">
+                          {language === "ta" ? `படி ${step.number} / 4` : `STEP ${step.number} OF 4`}
+                        </span>
                         <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
                           {step.title}
                         </h2>

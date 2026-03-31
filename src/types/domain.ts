@@ -13,6 +13,7 @@ export interface SessionViewer {
   accountStatus: ViewerAccountStatus;
   profileStatus: ViewerProfileStatus;
   profileComplete: boolean;
+  profileCompletionPercentage: number;
   gender: "Male" | "Female" | null;
   city: string | null;
   selectedInterests: string[];

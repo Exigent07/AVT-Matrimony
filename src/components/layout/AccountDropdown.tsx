@@ -6,6 +6,7 @@ import { ChevronDown, Heart, LogOut, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { AnimatedHeartIcon } from "@/components/shared/AnimatedHeartIcon";
 import { LanguageToggle } from "@/components/shared/LanguageToggle";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 export interface AccountDropdownLink {
   href: string;
@@ -31,6 +32,7 @@ export function AccountDropdown({
   includeLanguageToggle = false,
   onLogout,
 }: AccountDropdownProps) {
+  const { language } = useLanguage();
   const [open, setOpen] = useState(false);
   const [avatarFailed, setAvatarFailed] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -62,6 +64,7 @@ export function AccountDropdown({
   }, []);
 
   const resolvedAvatarUrl = avatarUrl && !avatarFailed ? avatarUrl : null;
+  const hasLinks = links.length > 0;
 
   return (
     <div ref={containerRef} className="relative">
@@ -84,7 +87,7 @@ export function AccountDropdown({
             <FallbackIcon className="h-3.5 w-3.5" />
           )}
         </span>
-        <span className="max-w-[12rem] truncate text-left text-[13px] font-semibold text-gray-100">
+        <span className="max-w-[8.75rem] truncate text-left text-[13px] font-semibold text-gray-100 sm:max-w-[10rem] md:max-w-[12rem]">
           {label}
         </span>
         <ChevronDown
@@ -123,7 +126,9 @@ export function AccountDropdown({
               ))}
               {includeLanguageToggle ? (
                 <>
-                  <div className="mx-2 my-1 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+                  {hasLinks ? (
+                    <div className="mx-2 my-1 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+                  ) : null}
                   <div className="px-3 py-2">
                     <LanguageToggle />
                   </div>
@@ -131,7 +136,9 @@ export function AccountDropdown({
               ) : null}
               {onLogout ? (
                 <>
-                  <div className="mx-2 my-1 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+                  {hasLinks || includeLanguageToggle ? (
+                    <div className="mx-2 my-1 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+                  ) : null}
                   <button
                     onClick={() => {
                       setOpen(false);
@@ -142,7 +149,7 @@ export function AccountDropdown({
                     <span className="nav-menu-item__icon">
                       <LogOut className="h-4 w-4" />
                     </span>
-                    <span>Sign out</span>
+                    <span>{language === "ta" ? "வெளியேறு" : "Sign out"}</span>
                   </button>
                 </>
               ) : null}

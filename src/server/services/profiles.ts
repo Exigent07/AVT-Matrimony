@@ -7,6 +7,7 @@ import type { Prisma } from "@prisma/client";
 import type { z } from "zod";
 import {
   buildProfileCompletion,
+  buildProfileCompletionState,
   genderToDb,
   normalizePhone,
   optionalInt,
@@ -390,6 +391,29 @@ export async function updateProfile(userId: string, input: ProfileUpdateInput) {
     currentProfile.status === ProfileStatus.REJECTED
       ? ProfileStatus.PENDING
       : currentProfile.status;
+  const isProfileComplete = buildProfileCompletion({
+    fullName: input.fullName,
+    gender: input.gender,
+    dateOfBirth,
+    height: input.height,
+    maritalStatus: input.maritalStatus,
+    profilePhotoUrl: input.profilePhotoUrl,
+    community: input.community,
+    religion: input.religion,
+    caste: input.caste,
+    city: input.city,
+    state: input.state,
+    education: input.education,
+    occupation: input.occupation,
+    annualIncome: input.income,
+    about: input.about,
+    hobbies: input.hobbies,
+    selectedInterests: input.selectedInterests,
+    partnerExpectations: input.partnerExpectations,
+    email: input.email,
+    phone: input.phone,
+    horoscopeImageUrl: input.horoscopeImageUrl,
+  });
 
   const updatedUser = await db.$transaction(async (tx) => {
     const user = await tx.user.update({
@@ -448,16 +472,7 @@ export async function updateProfile(userId: string, input: ProfileUpdateInput) {
             partnerExpectations: input.partnerExpectations,
             profilePhotoUrl: input.profilePhotoUrl || null,
             horoscopeImageUrl: input.horoscopeImageUrl || null,
-            isProfileComplete: buildProfileCompletion({
-              fullName: input.fullName,
-              dateOfBirth,
-              gender: input.gender,
-              city: input.city,
-              state: input.state,
-              education: input.education,
-              occupation: input.occupation,
-              about: input.about,
-            }),
+            isProfileComplete,
             status: nextStatus,
           },
         },
@@ -509,8 +524,36 @@ export async function sendInterest(userId: string, input: SendInterestInput) {
     }),
   ]);
 
-  if (!viewer.profile?.isProfileComplete) {
+  const viewerCompletion = buildProfileCompletionState({
+    fullName: viewer.fullName,
+    gender: viewer.profile?.gender,
+    dateOfBirth: viewer.profile?.dateOfBirth,
+    height: viewer.profile?.heightLabel ?? viewer.profile?.heightCm,
+    maritalStatus: viewer.profile?.maritalStatus,
+    profilePhotoUrl: viewer.profile?.profilePhotoUrl,
+    community: viewer.profile?.community,
+    religion: viewer.profile?.religion,
+    caste: viewer.profile?.caste,
+    city: viewer.profile?.city,
+    state: viewer.profile?.state,
+    education: viewer.profile?.education,
+    occupation: viewer.profile?.occupation,
+    annualIncome: viewer.profile?.annualIncome,
+    about: viewer.profile?.about,
+    hobbies: viewer.profile?.hobbies,
+    selectedInterests: viewer.profile?.interests.map(({ interest }) => interest.label) ?? [],
+    partnerExpectations: viewer.profile?.partnerExpectations,
+    email: viewer.email,
+    phone: viewer.phone,
+    horoscopeImageUrl: viewer.profile?.horoscopeImageUrl,
+  });
+
+  if (!viewerCompletion.isComplete) {
     throw new AppError("Complete your profile before sending an interest request.", 400);
+  }
+
+  if (!viewer.profile) {
+    throw new AppError("Profile not found.", 404);
   }
 
   if (

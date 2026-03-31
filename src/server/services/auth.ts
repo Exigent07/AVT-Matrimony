@@ -107,6 +107,25 @@ export async function registerMember(input: RegisterInput) {
 
   const passwordHash = await hashPassword(input.password);
   const heightCm = parseHeightToCentimeters(input.height);
+  const isProfileComplete = buildProfileCompletion({
+    fullName: input.fullName,
+    dateOfBirth: input.dateOfBirth,
+    gender: input.gender,
+    height: input.height,
+    maritalStatus: input.maritalStatus,
+    caste: input.caste,
+    city: input.city,
+    state: input.state,
+    education: input.education,
+    occupation: input.occupation,
+    email: input.email,
+    phone: input.phone,
+    profilePhotoUrl: null,
+    about: null,
+    partnerExpectations: null,
+    annualIncome: input.income,
+    community: input.community,
+  });
 
   return db.user.create({
     data: {
@@ -132,19 +151,9 @@ export async function registerMember(input: RegisterInput) {
           education: input.education,
           occupation: input.occupation,
           annualIncome: input.income || null,
-          about: `Hello, I am ${input.fullName} from ${input.city}. I am looking for a thoughtful, family-oriented life partner.`,
-          partnerExpectations:
-            "Looking for a compatible partner who shares similar values, warmth, and long-term commitment.",
-          isProfileComplete: buildProfileCompletion({
-            fullName: input.fullName,
-            dateOfBirth: input.dateOfBirth,
-            gender: input.gender,
-            city: input.city,
-            state: input.state,
-            education: input.education,
-            occupation: input.occupation,
-            about: `Hello, I am ${input.fullName} from ${input.city}.`,
-          }),
+          about: null,
+          partnerExpectations: null,
+          isProfileComplete,
           status: ProfileStatus.PENDING,
         },
       },

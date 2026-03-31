@@ -3,6 +3,8 @@
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
+import { translateUiTerm } from "@/lib/translate-display";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 interface ConfirmationDialogProps {
   open: boolean;
@@ -19,12 +21,16 @@ export function ConfirmationDialog({
   open,
   title,
   description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   loading = false,
   onConfirm,
   onCancel,
 }: ConfirmationDialogProps) {
+  const { language } = useLanguage();
+  const resolvedConfirmLabel = confirmLabel ?? translateUiTerm("confirm", language);
+  const resolvedCancelLabel = cancelLabel ?? translateUiTerm("cancel", language);
+
   useEffect(() => {
     if (!open) return;
 
@@ -65,7 +71,9 @@ export function ConfirmationDialog({
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <div className="section-label">Please confirm</div>
+                <div className="section-label">
+                  {language === "ta" ? "தயவுசெய்து உறுதிப்படுத்தவும்" : "Please confirm"}
+                </div>
                 <h2 className="mt-2 text-2xl text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
                   {title}
                 </h2>
@@ -80,7 +88,7 @@ export function ConfirmationDialog({
                 disabled={loading}
                 className="btn-ghost justify-center px-5 py-3"
               >
-                {cancelLabel}
+                {resolvedCancelLabel}
               </button>
               <button
                 type="button"
@@ -91,10 +99,10 @@ export function ConfirmationDialog({
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Deleting...</span>
+                    <span>{translateUiTerm("deleting", language)}</span>
                   </>
                 ) : (
-                  <span>{confirmLabel}</span>
+                  <span>{resolvedConfirmLabel}</span>
                 )}
               </button>
             </div>

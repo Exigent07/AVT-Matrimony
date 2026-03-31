@@ -1,6 +1,6 @@
 "use client";
 
-import { Header } from '@/components/layout/Header';
+import { AppHeader } from "@/components/layout/AppHeader";
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { AnimatedHeartIcon } from '@/components/shared/AnimatedHeartIcon';
 import { PageTransition } from '@/components/shared/PageTransition';
@@ -16,75 +16,75 @@ interface StoriesProps {
 
 export function Stories({ viewer }: StoriesProps) {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const successStories = [
     {
       id: 1,
-      names: 'Priya & Karthik',
-      location: 'Chennai, 2025',
-      story: 'We found each other through AV Tamil Matrimony. The verification process gave our families confidence. What started as a simple profile match turned into a beautiful journey of getting to know each other and our families. We are grateful for the platform that brought us together.',
-      quote: 'The verification process gave our families confidence and peace of mind.',
+      names: language === "ta" ? 'ப்ரியா & கார்த்திக்' : 'Priya & Karthik',
+      location: language === "ta" ? 'சென்னை, 2025' : 'Chennai, 2025',
+      story: language === "ta" ? 'நாங்கள் AV தமிழ் மேட்ரிமோனி மூலம் ஒருவரையொருவர் கண்டுபிடித்தோம். சரிபார்ப்பு செயல்முறை எங்கள் குடும்பங்களுக்கு நம்பிக்கையை வழங்கியது. ஒரு எளிய சுயவிவர பொருத்தமாகத் தொடங்கியது, எங்களையும் எங்கள் குடும்பங்களையும் அறிந்து கொள்ளும் அழகான பயணமாக மாறியது.' : 'We found each other through AV Tamil Matrimony. The verification process gave our families confidence. What started as a simple profile match turned into a beautiful journey of getting to know each other and our families. We are grateful for the platform that brought us together.',
+      quote: language === "ta" ? 'சரிபார்ப்பு செயல்முறை எங்கள் குடும்பங்களுக்கு நம்பிக்கையும் மனநிம்மதியும் வழங்கியது.' : 'The verification process gave our families confidence and peace of mind.',
     },
     {
       id: 2,
-      names: 'Lakshmi & Raj',
-      location: 'Coimbatore, 2026',
-      story: 'Simple, respectful, and effective. No unnecessary features, just what matters for finding a life partner. We appreciated the focus on family values and the genuine profiles. Within three months of joining, we found each other and knew it was meant to be.',
-      quote: 'Simple, respectful, and effective - exactly what we needed.',
+      names: language === "ta" ? 'லட்சுமி & ராஜ்' : 'Lakshmi & Raj',
+      location: language === "ta" ? 'கோயம்புத்தூர், 2026' : 'Coimbatore, 2026',
+      story: language === "ta" ? 'எளிமையானது, மரியாதையானது, மற்றும் பயனுள்ளது. வாழ்க்கைத்துணையைத் தேடுவதற்கு தேவையான அம்சங்கள் மட்டும். குடும்ப மதிப்புகள் மற்றும் உண்மையான சுயவிவரங்கள் மீது இருந்த கவனம் எங்களுக்கு மிகவும் பிடித்தது.' : 'Simple, respectful, and effective. No unnecessary features, just what matters for finding a life partner. We appreciated the focus on family values and the genuine profiles. Within three months of joining, we found each other and knew it was meant to be.',
+      quote: language === "ta" ? 'எங்களுக்கு தேவைப்பட்டதுதான் இது - எளிமை, மரியாதை, மற்றும் பயன்.' : 'Simple, respectful, and effective - exactly what we needed.',
     },
     {
       id: 3,
-      names: 'Divya & Arun',
-      location: 'Singapore, 2025',
-      story: 'Being abroad, it was important to find someone who understood both cultures. AV helped us connect meaningfully. Despite being in different countries, the platform made it easy to communicate with our families and make the right decision together.',
-      quote: 'AV helped us connect meaningfully across continents.',
+      names: language === "ta" ? 'திவ்யா & அருண்' : 'Divya & Arun',
+      location: language === "ta" ? 'சிங்கப்பூர், 2025' : 'Singapore, 2025',
+      story: language === "ta" ? 'வெளிநாட்டில் இருந்ததால், இரண்டு கலாசாரங்களையும் புரிந்துகொள்ளும் ஒருவரைத் தேடுவது முக்கியமாக இருந்தது. AV எங்களுக்கு அர்த்தமுள்ள இணைப்பை உருவாக்க உதவியது.' : 'Being abroad, it was important to find someone who understood both cultures. AV helped us connect meaningfully. Despite being in different countries, the platform made it easy to communicate with our families and make the right decision together.',
+      quote: language === "ta" ? 'கண்டங்களைத் தாண்டி அர்த்தமுள்ள தொடர்பை AV உருவாக்க உதவியது.' : 'AV helped us connect meaningfully across continents.',
     },
     {
       id: 4,
-      names: 'Meera & Venkat',
-      location: 'Bangalore, 2025',
-      story: 'We were both professionals with busy schedules. AV Matrimony made it easy to find compatible matches without compromising on our values. The detailed profiles helped us understand compatibility before even meeting. Our families connected instantly.',
-      quote: 'Finding someone who shares your values and vision for the future.',
+      names: language === "ta" ? 'மீரா & வெங்கட்' : 'Meera & Venkat',
+      location: language === "ta" ? 'பெங்களூரு, 2025' : 'Bangalore, 2025',
+      story: language === "ta" ? 'நாங்கள் இருவரும் பிஸியான அட்டவணையுடன் இருந்த தொழில்முனைவர்கள். எங்கள் மதிப்புகளை விட்டுக்கொடுக்காமல் பொருத்தமான இணைப்புகளை AV மேட்ரிமோனி கண்டுபிடிக்க உதவியது.' : 'We were both professionals with busy schedules. AV Matrimony made it easy to find compatible matches without compromising on our values. The detailed profiles helped us understand compatibility before even meeting. Our families connected instantly.',
+      quote: language === "ta" ? 'உங்கள் மதிப்புகளையும் எதிர்காலக் கண்ணோட்டத்தையும் பகிரும் ஒருவரைக் கண்டுபிடிப்பது.' : 'Finding someone who shares your values and vision for the future.',
     },
     {
       id: 5,
-      names: 'Anjali & Suresh',
-      location: 'Madurai, 2024',
-      story: 'As a traditional family, we valued the personal verification process. Every profile we viewed was genuine. The support team was helpful throughout our journey. We found our perfect match within the Tamil community we value so much.',
-      quote: 'Traditional values meeting modern convenience - perfect!',
+      names: language === "ta" ? 'அஞ்சலி & சுரேஷ்' : 'Anjali & Suresh',
+      location: language === "ta" ? 'மதுரை, 2024' : 'Madurai, 2024',
+      story: language === "ta" ? 'ஒரு பாரம்பரிய குடும்பமாக, தனிப்பட்ட சரிபார்ப்பு செயல்முறையை நாம் மதித்தோம். நாம் பார்த்த ஒவ்வொரு சுயவிவரமும் உண்மையானதாக இருந்தது. பயணத்தின் முழுவதும் ஆதரவு குழு உதவிகரமாக இருந்தது.' : 'As a traditional family, we valued the personal verification process. Every profile we viewed was genuine. The support team was helpful throughout our journey. We found our perfect match within the Tamil community we value so much.',
+      quote: language === "ta" ? 'பாரம்பரிய மதிப்புகளும் நவீன வசதியும் சேர்ந்த சிறந்த அனுபவம்!' : 'Traditional values meeting modern convenience - perfect!',
     },
     {
       id: 6,
-      names: 'Kavitha & Ramesh',
-      location: 'USA, 2025',
-      story: 'Living in the USA, we wanted to stay connected to our Tamil roots. AV Matrimony helped us find partners who understood our dual identity. The platform\'s global reach connected us with someone from our community living abroad.',
-      quote: 'Staying connected to our roots while building a future abroad.',
+      names: language === "ta" ? 'கவிதா & ரமேஷ்' : 'Kavitha & Ramesh',
+      location: language === "ta" ? 'அமெரிக்கா, 2025' : 'USA, 2025',
+      story: language === "ta" ? 'அமெரிக்காவில் வாழ்ந்தாலும், எங்கள் தமிழ் வேர்களுடன் இணைந்திருக்க விரும்பினோம். எங்கள் இரட்டை அடையாளத்தைப் புரிந்துகொள்ளும் துணையை AV மேட்ரிமோனி கண்டுபிடிக்க உதவியது.' : 'Living in the USA, we wanted to stay connected to our Tamil roots. AV Matrimony helped us find partners who understood our dual identity. The platform\'s global reach connected us with someone from our community living abroad.',
+      quote: language === "ta" ? 'வெளிநாட்டில் எதிர்காலத்தை கட்டியெழுப்பும் போதும் எங்கள் வேர்களுடன் இணைந்திருப்பது.' : 'Staying connected to our roots while building a future abroad.',
     },
   ];
 
   const testimonials = [
     {
-      name: 'Saravanan Family',
-      relation: 'Parents',
-      text: 'As parents, finding the right match for our daughter was paramount. AV Tamil Matrimony\'s verification process and family-centered approach gave us the confidence we needed. Highly recommended!',
+      name: language === "ta" ? 'சரவணன் குடும்பம்' : 'Saravanan Family',
+      relation: language === "ta" ? 'பெற்றோர்' : 'Parents',
+      text: language === "ta" ? 'பெற்றோர்களாக, எங்கள் மகளுக்கு சரியான பொருத்தத்தைப் பெறுவது மிக முக்கியம். AV தமிழ் மேட்ரிமோனியின் சரிபார்ப்பு செயல்முறை மற்றும் குடும்ப மைய அணுகுமுறை எங்களுக்கு தேவைப்பட்ட நம்பிக்கையை வழங்கியது.' : 'As parents, finding the right match for our daughter was paramount. AV Tamil Matrimony\'s verification process and family-centered approach gave us the confidence we needed. Highly recommended!',
     },
     {
-      name: 'Janaki Krishnan',
-      relation: 'User',
-      text: 'I was skeptical about online matrimony, but AV changed my perspective. The profiles are genuine, the process is respectful, and the support team is always available to help.',
+      name: language === "ta" ? 'ஜானகி கிருஷ்ணன்' : 'Janaki Krishnan',
+      relation: language === "ta" ? 'உறுப்பினர்' : 'User',
+      text: language === "ta" ? 'ஆன்லைன் மேட்ரிமோனியைப் பற்றி எனக்கு சந்தேகம் இருந்தது, ஆனால் AV என் எண்ணத்தை மாற்றியது. சுயவிவரங்கள் உண்மையானவை, செயல்முறை மரியாதையானது, மற்றும் ஆதரவு குழு எப்போதும் உதவத் தயாராக இருந்தது.' : 'I was skeptical about online matrimony, but AV changed my perspective. The profiles are genuine, the process is respectful, and the support team is always available to help.',
     },
     {
-      name: 'Murugan & Lakshmi',
-      relation: 'Married Couple',
-      text: 'We got married last year after meeting through AV Tamil Matrimony. The platform made it easy for our families to connect and communicate. Thank you for bringing us together!',
+      name: language === "ta" ? 'முருகன் & லட்சுமி' : 'Murugan & Lakshmi',
+      relation: language === "ta" ? 'திருமணமான ஜோடி' : 'Married Couple',
+      text: language === "ta" ? 'AV தமிழ் மேட்ரிமோனி மூலம் சந்தித்த பிறகு கடந்த ஆண்டு நாங்கள் திருமணம் செய்துகொண்டோம். எங்கள் குடும்பங்கள் இணைந்து பேசுவதற்கு தளம் மிகவும் உதவிகரமாக இருந்தது.' : 'We got married last year after meeting through AV Tamil Matrimony. The platform made it easy for our families to connect and communicate. Thank you for bringing us together!',
     },
   ];
 
   return (
     <PageTransition>
       <div className="page-shell">
-        <Header activeLink="stories" viewer={viewer} />
+        <AppHeader mode="public" activeLink="stories" viewer={viewer} />
 
         <section className="section-shell section-block pt-4 md:pt-6">
           <div className="hero-surface p-6 text-center md:p-10 lg:p-12">
@@ -93,7 +93,7 @@ export function Stories({ viewer }: StoriesProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <span className="eyebrow-pill">Real connections</span>
+              <span className="eyebrow-pill">{language === "ta" ? "உண்மையான இணைப்புகள்" : "Real connections"}</span>
               <h1 className="mt-5 text-4xl text-slate-900 md:text-5xl lg:text-[4rem]" style={{ fontFamily: "var(--font-display)" }}>
                 {t("stories.title")}
               </h1>
@@ -166,7 +166,7 @@ export function Stories({ viewer }: StoriesProps) {
         <section className="section-shell section-block pt-0">
           <div className="panel-surface p-6 md:p-8 lg:p-10">
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
-              <span className="section-label">Voices of trust</span>
+              <span className="section-label">{language === "ta" ? "நம்பிக்கையின் குரல்கள்" : "Voices of trust"}</span>
               <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
                 {t("stories.testimonials.title")}
               </h2>

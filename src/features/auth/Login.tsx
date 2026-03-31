@@ -14,25 +14,25 @@ import { useLanguage } from "@/providers/LanguageProvider";
 
 export function Login() {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const highlights = [
     {
       icon: ShieldCheck,
-      title: "Verified-first directory",
-      description: "Profiles are reviewed before they become visible to the wider community.",
+      title: language === "ta" ? "முதலில் சரிபார்க்கப்பட்ட பட்டியல்" : "Verified-first directory",
+      description: language === "ta" ? "பெரிய சமூகத்திற்கு காட்சியளிக்கும் முன் சுயவிவரங்கள் பரிசீலிக்கப்படுகின்றன." : "Profiles are reviewed before they become visible to the wider community.",
     },
     {
       icon: Heart,
-      title: "Intentional introductions",
-      description: "Interest requests and contact sharing stay deliberate and family-friendly.",
+      title: language === "ta" ? "நோக்கமுள்ள அறிமுகங்கள்" : "Intentional introductions",
+      description: language === "ta" ? "ஆர்வக் கோரிக்கைகள் மற்றும் தொடர்பு பகிர்வு திட்டமிட்டதும் குடும்ப நட்புமுறையுடனும் இருக்கும்." : "Interest requests and contact sharing stay deliberate and family-friendly.",
     },
     {
       icon: Users,
-      title: "Tamil family focus",
-      description: "A calmer experience built around compatibility, culture, and long-term fit.",
+      title: language === "ta" ? "தமிழ் குடும்ப கவனம்" : "Tamil family focus",
+      description: language === "ta" ? "பொருத்தம், கலாசாரம், மற்றும் நீண்டகால பொருத்தத்தை மையமாகக் கொண்ட அமைதியான அனுபவம்." : "A calmer experience built around compatibility, culture, and long-term fit.",
     },
   ];
 
@@ -45,11 +45,11 @@ export function Login() {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
-      toast.success("Welcome back.");
+      toast.success(language === "ta" ? "மீண்டும் வரவேற்கிறோம்." : "Welcome back.");
       router.push("/dashboard");
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to sign in.");
+      toast.error(error instanceof Error ? error.message : language === "ta" ? "உள்நுழைய முடியவில்லை." : "Unable to sign in.");
     } finally {
       setIsLoading(false);
     }
@@ -67,14 +67,15 @@ export function Login() {
               className="hidden lg:block"
             >
               <div className="hero-surface h-full p-8 xl:p-10">
-                <span className="eyebrow-pill">Member sign in</span>
+                <span className="eyebrow-pill">{language === "ta" ? "உறுப்பினர் உள்நுழைவு" : "Member sign in"}</span>
                 <div className="mt-8 max-w-lg">
                   <h1 className="text-5xl text-slate-900 xl:text-[4rem]" style={{ fontFamily: "var(--font-display)" }}>
-                    Continue your match journey with clarity.
+                    {language === "ta" ? "தெளிவுடன் உங்கள் பொருத்தப் பயணத்தை தொடருங்கள்." : "Continue your match journey with clarity."}
                   </h1>
                   <p className="mt-5 text-base leading-relaxed text-slate-600 xl:text-lg">
-                    Pick up where you left off, review profile activity, and move promising
-                    connections forward with confidence.
+                    {language === "ta"
+                      ? "நீங்கள் நிறுத்திய இடத்திலிருந்து தொடருங்கள், சுயவிவரச் செயல்பாட்டைப் பார்வையிட்டு, நம்பிக்கையுடன் நல்ல இணைப்புகளை முன்னேற்றுங்கள்."
+                      : "Pick up where you left off, review profile activity, and move promising connections forward with confidence."}
                   </p>
                 </div>
 
@@ -119,7 +120,7 @@ export function Login() {
               <span>{t("login.back.to.home")}</span>
             </button>
             <Link href="/">
-              <Logo size="small" showText={false} variant="light" />
+              <Logo size="medium" showText={false} variant="light" />
             </Link>
           </motion.div>
 
@@ -129,7 +130,7 @@ export function Login() {
             transition={{ duration: 0.3 }}
             className="panel-surface p-7 sm:p-8"
           >
-            <div className="section-label">Welcome back</div>
+            <div className="section-label">{language === "ta" ? "மீண்டும் வரவேற்கிறோம்" : "Welcome back"}</div>
             <h1 className="mt-3 text-4xl text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
               {t("common.login")}
             </h1>
@@ -148,7 +149,7 @@ export function Login() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   className="input-field mt-1.5"
-                  placeholder="name@example.com"
+                  placeholder={language === "ta" ? "பெயர்@உதாரணம்.com" : "name@example.com"}
                   autoComplete="email"
                   required
                 />
@@ -160,10 +161,12 @@ export function Login() {
                     {t("login.password")}
                   </label>
                   <Link
-                    href="/help?tab=contact&subject=Password%20assistance"
+                    href={`/help?tab=contact&subject=${encodeURIComponent(
+                      language === "ta" ? "கடவுச்சொல் உதவி" : "Password assistance",
+                    )}`}
                     className="text-xs font-medium text-slate-400 transition-colors hover:text-[#B91C1C]"
                   >
-                    Forgot password
+                    {language === "ta" ? "கடவுச்சொல் மறந்துவிட்டதா" : "Forgot password"}
                   </Link>
                 </div>
                 <input
@@ -205,7 +208,7 @@ export function Login() {
                 href="/admin/login"
                 className="text-xs font-medium text-slate-400 transition-colors hover:text-slate-600"
               >
-                Administrator sign in
+                {language === "ta" ? "நிர்வாகி உள்நுழைவு" : "Administrator sign in"}
               </Link>
             </div>
           </motion.div>
