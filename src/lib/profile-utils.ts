@@ -5,6 +5,8 @@ export type ProfileCompletionSectionKey =
   | "background"
   | "career"
   | "story"
+  | "partner"
+  | "interests"
   | "contact";
 
 export type ProfileCompletionFieldKey =
@@ -22,9 +24,12 @@ export type ProfileCompletionFieldKey =
   | "education"
   | "occupation"
   | "annualIncome"
+  | "familyStatus"
+  | "familyType"
   | "about"
   | "hobbies"
   | "selectedInterests"
+  | "partnerLocation"
   | "partnerExpectations"
   | "email"
   | "phone"
@@ -45,9 +50,12 @@ export interface ProfileCompletionInput {
   education?: string | null;
   occupation?: string | null;
   annualIncome?: string | null;
+  familyStatus?: string | null;
+  familyType?: string | null;
   about?: string | null;
   hobbies?: string | null;
   selectedInterests?: string[] | null;
+  partnerLocation?: string | null;
   partnerExpectations?: string | null;
   email?: string | null;
   phone?: string | null;
@@ -289,20 +297,20 @@ export function buildProfileCompletionState(
     },
     {
       key: "profilePhotoUrl",
-      section: "identity",
+      section: "contact",
       required: true,
       complete: hasMeaningfulText(input.profilePhotoUrl),
     },
     {
       key: "community",
       section: "background",
-      required: false,
+      required: true,
       complete: hasMeaningfulText(input.community, 2),
     },
     {
       key: "religion",
       section: "background",
-      required: false,
+      required: true,
       complete: hasMeaningfulText(input.religion, 2),
     },
     {
@@ -338,8 +346,20 @@ export function buildProfileCompletionState(
     {
       key: "annualIncome",
       section: "career",
-      required: false,
+      required: true,
       complete: hasMeaningfulText(input.annualIncome, 2),
+    },
+    {
+      key: "familyStatus",
+      section: "career",
+      required: true,
+      complete: hasMeaningfulText(input.familyStatus, 2),
+    },
+    {
+      key: "familyType",
+      section: "career",
+      required: true,
+      complete: hasMeaningfulText(input.familyType, 2),
     },
     {
       key: "about",
@@ -355,13 +375,19 @@ export function buildProfileCompletionState(
     },
     {
       key: "selectedInterests",
-      section: "story",
-      required: false,
+      section: "interests",
+      required: true,
       complete: hasMeaningfulInterests(input.selectedInterests),
     },
     {
+      key: "partnerLocation",
+      section: "partner",
+      required: true,
+      complete: hasMeaningfulText(input.partnerLocation, 2),
+    },
+    {
       key: "partnerExpectations",
-      section: "story",
+      section: "partner",
       required: true,
       complete: hasMeaningfulText(input.partnerExpectations, 12),
     },

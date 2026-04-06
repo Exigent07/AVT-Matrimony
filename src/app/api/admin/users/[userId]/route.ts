@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { apiError, requireApiViewer } from "@/server/api";
 import { deleteUserByAdmin, updateUserByAdmin } from "@/server/services/admin";
 import { buildAdminUserItem } from "@/server/services/mappers";
+import { db } from "@/server/db";
 import { adminUserUpdateSchema } from "@/server/validation";
 
 export async function PATCH(
@@ -14,8 +15,15 @@ export async function PATCH(
     const payload = adminUserUpdateSchema.parse(await request.json());
     const user = await updateUserByAdmin(userId, payload);
 
+    // Query the actual interest count for this user rather than hard-coding 0.
+    const interestCount = await db.interestRequest.count({
+      where: {
+        OR: [{ fromUserId: userId }, { toUserId: userId }],
+      },
+    });
+
     return NextResponse.json({
-      user: buildAdminUserItem(user, 0),
+      user: buildAdminUserItem(user, interestCount),
     });
   } catch (error) {
     return apiError(error);

@@ -23,6 +23,8 @@ export function HowItWorks({ viewer }: HowItWorksProps) {
       number: 1,
       title: t('howitworks.step1.title'),
       icon: User,
+      image: '/images/step-register.png',
+      imageAlt: language === "ta" ? "சுயவிவரம் உருவாக்கு" : "Create your profile",
       description: t('howitworks.step1.desc'),
       features: language === "ta"
         ? [
@@ -42,6 +44,8 @@ export function HowItWorks({ viewer }: HowItWorksProps) {
       number: 2,
       title: t('howitworks.step2.title'),
       icon: Search,
+      image: '/images/step-search.png',
+      imageAlt: language === "ta" ? "சுயவிவரங்களை உலாவு" : "Browse profiles",
       description: t('howitworks.step2.desc'),
       features: language === "ta"
         ? [
@@ -61,6 +65,8 @@ export function HowItWorks({ viewer }: HowItWorksProps) {
       number: 3,
       title: t('howitworks.step3.title'),
       icon: Heart,
+      image: '/images/step-connect.png',
+      imageAlt: language === "ta" ? "ஆர்வம் அனுப்பு" : "Send interest",
       description: t('howitworks.step3.desc'),
       features: language === "ta"
         ? [
@@ -80,6 +86,8 @@ export function HowItWorks({ viewer }: HowItWorksProps) {
       number: 4,
       title: t('howitworks.step4.title'),
       icon: Sparkles,
+      image: '/images/step-meet.png',
+      imageAlt: language === "ta" ? "சந்தித்து மணம் புரி" : "Meet and marry",
       description: t('howitworks.step4.desc'),
       features: language === "ta"
         ? [
@@ -103,14 +111,14 @@ export function HowItWorks({ viewer }: HowItWorksProps) {
         <AppHeader mode="public" activeLink="how-it-works" viewer={viewer} />
 
         <section className="section-shell section-block pt-4 md:pt-6">
-          <div className="hero-surface p-6 text-center md:p-10 lg:p-12">
+          <div className="hero-surface overflow-hidden p-6 text-center md:p-10 lg:p-12">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
               <span className="eyebrow-pill">{t("howitworks.badge")}</span>
-              <h1 className="mt-5 text-4xl text-slate-900 md:text-5xl lg:text-[4rem]" style={{ fontFamily: "var(--font-display)" }}>
+              <h1 className="mt-5 text-4xl text-slate-900 md:text-5xl lg:text-[4rem]">
                 {t("howitworks.title")}
               </h1>
               <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-500 md:text-lg">
@@ -118,13 +126,30 @@ export function HowItWorks({ viewer }: HowItWorksProps) {
               </p>
             </motion.div>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {/* Banner image */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mt-8 overflow-hidden rounded-[1.5rem] border border-[#B91C1C]/10 bg-[#f5ece0] shadow-[0_18px_36px_rgba(15,23,42,0.07)]"
+            >
+              <img
+                src="/images/how-it-works-banner.png"
+                alt={language === "ta" ? "தமிழ் திருமண பாரம்பரியம்" : "Traditional Tamil wedding elements"}
+                className="aspect-[16/5] w-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none';
+                }}
+              />
+            </motion.div>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {steps.map((step) => (
                 <div key={step.number} className="panel-muted p-4 text-left">
                   <div className="section-label">
                     {language === "ta" ? `படி ${step.number}` : `Step ${step.number}`}
                   </div>
-                  <div className="mt-2 text-lg text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
+                  <div className="mt-2 font-display text-lg text-slate-900">
                     {step.title}
                   </div>
                 </div>
@@ -147,15 +172,11 @@ export function HowItWorks({ viewer }: HowItWorksProps) {
                   transition={{ duration: 0.5 }}
                   className="panel-surface overflow-hidden"
                 >
-                  <div className="grid grid-cols-1 items-center gap-8 p-6 md:grid-cols-2 md:gap-12 md:p-8 lg:p-10">
-                    <div className={`relative ${!isEven ? "md:order-2" : ""}`}>
+                  <div className="grid grid-cols-1 items-stretch gap-0 md:grid-cols-2">
+                    {/* Left: text + features */}
+                    <div className={`relative flex flex-col justify-center p-6 md:p-8 lg:p-10 ${!isEven ? "md:order-2" : ""}`}>
                       <div
-                        className="absolute -top-6 text-[100px] leading-none text-[#B91C1C] opacity-[0.06] md:-top-8 md:text-[130px] lg:text-[150px]"
-                        style={{
-                          fontFamily: "var(--font-display)",
-                          left: isEven ? "-0.5rem" : undefined,
-                          right: !isEven ? "-0.5rem" : undefined,
-                        }}
+                        className={`absolute -top-4 font-display text-[90px] leading-none text-[#B91C1C] opacity-[0.05] md:text-[120px] lg:text-[140px] ${isEven ? "-left-1" : "-right-1"}`}
                       >
                         {step.number}
                       </div>
@@ -163,30 +184,42 @@ export function HowItWorks({ viewer }: HowItWorksProps) {
                         <span className="section-label">
                           {language === "ta" ? `படி ${step.number} / 4` : `STEP ${step.number} OF 4`}
                         </span>
-                        <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
-                          {step.title}
-                        </h2>
-                        <p className="mt-3 text-base leading-relaxed text-slate-500">
+                        <div className="mt-2 flex items-center gap-3">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#B91C1C] to-[#7F1D1D] text-white shadow-[0_10px_20px_rgba(185,28,28,0.16)]">
+                            {step.icon === Heart ? (
+                              <AnimatedHeartIcon className="h-4 w-4" active />
+                            ) : (
+                              <step.icon className="h-4 w-4" />
+                            )}
+                          </div>
+                          <h2 className="text-2xl text-slate-900 md:text-3xl">
+                            {step.title}
+                          </h2>
+                        </div>
+                        <p className="mt-3 text-sm leading-relaxed text-slate-500 md:text-base">
                           {step.description}
                         </p>
-                        <ul className="mt-6 space-y-3">
+                        <div className="mt-5 grid gap-2">
                           {step.features.map((feature, i) => (
-                            <li key={i} className="flex items-start gap-3 text-sm text-slate-600">
-                              <div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B91C1C]" />
+                            <div key={i} className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white/60 px-4 py-3 text-sm text-slate-700">
+                              <div className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#B91C1C]/60" />
                               <span>{feature}</span>
-                            </li>
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                       </div>
                     </div>
-                    <div className={`flex items-center justify-center ${!isEven ? "md:order-1" : ""}`}>
-                      <div className="flex h-44 w-44 items-center justify-center rounded-full border border-[#B91C1C]/12 bg-gradient-to-br from-[#fffaf4] to-[#f5e6d3] shadow-[0_30px_70px_rgba(15,23,42,0.1)] md:h-56 md:w-56 lg:h-64 lg:w-64">
-                        {step.icon === Heart ? (
-                          <AnimatedHeartIcon className="h-20 w-20 text-[#B91C1C] md:h-24 md:w-24 lg:h-28 lg:w-28" active />
-                        ) : (
-                          <step.icon className="h-20 w-20 text-[#B91C1C] md:h-24 md:w-24 lg:h-28 lg:w-28" />
-                        )}
-                      </div>
+                    {/* Right: image fills full column height */}
+                    <div className={`relative min-h-[280px] overflow-hidden md:min-h-0 ${!isEven ? "md:order-1" : ""}`}>
+                      <img
+                        src={step.image}
+                        alt={step.imageAlt}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).parentElement!.classList.add('bg-[#f5ece0]');
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
                     </div>
                   </div>
                 </motion.div>
@@ -197,7 +230,7 @@ export function HowItWorks({ viewer }: HowItWorksProps) {
 
         <section className="section-shell section-block pt-0">
           <div className="hero-surface px-6 py-10 text-center md:px-10 md:py-12">
-            <h2 className="text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
+            <h2 className="text-3xl text-slate-900 md:text-4xl">
               {t("howitworks.cta.title")}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base text-slate-500 md:text-lg">

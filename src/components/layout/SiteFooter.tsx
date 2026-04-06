@@ -73,36 +73,23 @@ export function SiteFooter({ variant = "solid" }: SiteFooterProps) {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3">
-                <Link
-                  href="/register"
-                  className="flex items-center justify-between rounded-[1.5rem] border border-white/[0.08] bg-white/[0.04] px-5 py-4 text-left transition-all hover:bg-white/[0.07]"
-                >
-                  <div>
-                    <div className="text-sm font-semibold text-white">{copy.ctaRegisterTitle}</div>
-                    <div className="mt-1 text-xs text-gray-400">{copy.ctaRegisterDescription}</div>
-                  </div>
-                  <span className="text-[#B91C1C]">01</span>
-                </Link>
-                <Link
-                  href="/how-it-works"
-                  className="flex items-center justify-between rounded-[1.5rem] border border-white/[0.08] bg-white/[0.04] px-5 py-4 text-left transition-all hover:bg-white/[0.07]"
-                >
-                  <div>
-                    <div className="text-sm font-semibold text-white">{copy.ctaHowTitle}</div>
-                    <div className="mt-1 text-xs text-gray-400">{copy.ctaHowDescription}</div>
-                  </div>
-                  <span className="text-[#B91C1C]">02</span>
-                </Link>
-                <Link
-                  href="/help"
-                  className="flex items-center justify-between rounded-[1.5rem] border border-white/[0.08] bg-white/[0.04] px-5 py-4 text-left transition-all hover:bg-white/[0.07]"
-                >
-                  <div>
-                    <div className="text-sm font-semibold text-white">{copy.ctaSupportTitle}</div>
-                    <div className="mt-1 text-xs text-gray-400">{copy.ctaSupportDescription}</div>
-                  </div>
-                  <span className="text-[#B91C1C]">03</span>
-                </Link>
+                {[
+                  { href: "/register", title: copy.ctaRegisterTitle, desc: copy.ctaRegisterDescription, num: "01" },
+                  { href: "/how-it-works", title: copy.ctaHowTitle, desc: copy.ctaHowDescription, num: "02" },
+                  { href: "/help", title: copy.ctaSupportTitle, desc: copy.ctaSupportDescription, num: "03" },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="group flex items-center justify-between rounded-[1.5rem] border border-white/[0.08] bg-white/[0.04] px-5 py-4 text-left transition-all duration-200 hover:border-white/[0.13] hover:bg-white/[0.08]"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-white">{item.title}</div>
+                      <div className="mt-1 text-xs text-gray-400">{item.desc}</div>
+                    </div>
+                    <span className="ml-4 shrink-0 font-mono text-sm font-semibold text-[#B91C1C] transition-transform duration-200 group-hover:translate-x-0.5">{item.num}</span>
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
@@ -179,8 +166,9 @@ function FooterLink({ href, label }: { href: string; label: string }) {
     <li>
       <Link
         href={href}
-        className="text-sm text-gray-500 transition-colors duration-200 hover:text-gray-300"
+        className="group relative inline-flex items-center text-sm text-gray-500 transition-colors duration-200 hover:text-gray-200"
       >
+        <span className="absolute -bottom-px left-0 right-0 h-px scale-x-0 bg-gradient-to-r from-[#B91C1C]/60 to-transparent transition-transform duration-250 origin-left group-hover:scale-x-100" />
         {label}
       </Link>
     </li>

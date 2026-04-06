@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Mail, MessageSquare, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { MemberResumeTracker } from "@/components/shared/MemberResumeTracker";
 import {
   InputControl,
   SelectControl,
   TextareaControl,
 } from "@/components/shared/FormControls";
 import { PageTransition } from "@/components/shared/PageTransition";
+import type { MemberResumeEntry } from "@/lib/member-resume";
 import { requestJson } from "@/lib/client-request";
 import { SITE_CONFIG } from "@/lib/site-config";
 import { useLanguage } from "@/providers/LanguageProvider";
@@ -36,6 +38,12 @@ export function HelpCenter({
   viewer,
 }: HelpCenterProps) {
   const { language } = useLanguage();
+  const headerMode =
+    viewer?.role === "ADMIN"
+      ? "admin"
+      : viewer?.role === "MEMBER"
+        ? "member"
+        : "public";
   const [activeTab, setActiveTab] = useState<HelpTab>(initialTab);
   const [contactForm, setContactForm] = useState({
     name: initialName,
@@ -50,6 +58,51 @@ export function HelpCenter({
   });
   const [isSubmittingContact, setIsSubmittingContact] = useState(false);
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const resumeEntry = useMemo<MemberResumeEntry | null>(() => {
+    if (viewer?.role !== "MEMBER") {
+      return null;
+    }
+
+    const title =
+      activeTab === "contact"
+        ? {
+            en: "Contact support",
+            ta: "ஆதரவை தொடர்புகொள்ளவும்",
+          }
+        : activeTab === "report"
+          ? {
+              en: "Report a profile",
+              ta: "சுயவிவரத்தை புகார் செய்யவும்",
+            }
+          : {
+              en: "Help center",
+              ta: "உதவி மையம்",
+            };
+
+    const detail =
+      activeTab === "contact"
+        ? {
+            en: "Support request form in progress",
+            ta: "ஆதரவு கோரிக்கை படிவம் திறந்துள்ளது",
+          }
+        : activeTab === "report"
+          ? {
+              en: "Profile reporting workflow",
+              ta: "சுயவிவர புகார் நடைமுறை",
+            }
+          : {
+              en: "FAQ and safety guidance",
+              ta: "அடிக்கடி கேட்கப்படும் கேள்விகள் மற்றும் பாதுகாப்பு வழிகாட்டி",
+            };
+
+    return {
+      href: `/help?tab=${activeTab}`,
+      icon: "help",
+      title,
+      detail,
+      updatedAt: new Date().toISOString(),
+    };
+  }, [activeTab, viewer?.role]);
   const faqs = language === "ta"
     ? [
         {
@@ -140,8 +193,9 @@ export function HelpCenter({
   return (
     <PageTransition>
       <div className="page-shell">
+        {resumeEntry && viewer ? <MemberResumeTracker viewerId={viewer.id} entry={resumeEntry} /> : null}
         <AppHeader
-          mode="public"
+          mode={headerMode}
           activeLink="help"
           viewer={viewer}
         />

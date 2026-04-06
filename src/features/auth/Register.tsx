@@ -7,11 +7,16 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
-import { DateControl, InputControl, SelectControl } from "@/components/shared/FormControls";
-import { Logo } from "@/components/shared/Logo";
+import { DateControl, InputControl, PasswordControl, SelectControl } from "@/components/shared/FormControls";
 import { PageTransition } from "@/components/shared/PageTransition";
+import {
+  ANNUAL_INCOME_OPTIONS,
+  MARITAL_STATUS_OPTIONS,
+  isProfileOption,
+} from "@/lib/constants/profile-options";
 import { RequestError, requestJson } from "@/lib/client-request";
 import { isAdult, normalizePhone } from "@/lib/profile-utils";
+import { translateDisplayValue } from "@/lib/translate-display";
 import { useLanguage } from "@/providers/LanguageProvider";
 
 const PASSWORD_RULE =
@@ -53,6 +58,14 @@ const STEP_FIELDS = {
     "caste",
   ],
 } as const;
+
+const PROGRESS_FIELDS = {
+  1: ["profileFor", "fullName", "gender", "dateOfBirth"],
+  2: ["email", "phone", "password", "confirmPassword"],
+  3: ["height", "maritalStatus", "education", "occupation", "city", "state", "caste"],
+} as const;
+
+const PROGRESS_STEP_KEYS = [1, 2, 3] as const;
 
 type RegisterFormData = typeof INITIAL_FORM_DATA;
 type RegisterFieldKey = keyof RegisterFormData;
@@ -96,6 +109,17 @@ function hasValidHumanText(value: string) {
   return HUMAN_TEXT_RULE.test(value.trim());
 }
 
+function hasFullNameParts(value: string) {
+  return value
+    .trim()
+    .split(/\s+/)
+    .filter((part) => /[\p{L}]/u.test(part)).length >= 2;
+}
+
+function sanitizePhoneInput(value: string) {
+  return normalizePhone(value).slice(0, 10);
+}
+
 export function Register() {
   const router = useRouter();
   const { t, language } = useLanguage();
@@ -120,6 +144,42 @@ export function Register() {
           "Tell us who this profile is for and capture the member essentials.",
           "Secure the account with contact details and a stronger password.",
           "Set up the first profile snapshot before moving into full completion.",
+        ];
+  const stepFocusItems =
+    language === "ta"
+      ? [
+          [
+            "சுயவிவரம் யாருக்காக என்பதைத் தேர்ந்தெடுக்கவும்",
+            "பெயர், பாலினம், மற்றும் பிறந்த தேதியைச் சேர்க்கவும்",
+            "சமூக அல்லது குடும்ப பின்னணியை வழங்கவும்",
+          ],
+          [
+            "மின்னஞ்சலும் கைபேசி எண்ணையும் உறுதிப்படுத்தவும்",
+            "வலுவான கடவுச்சொல்லை உருவாக்கவும்",
+            "பாதுகாப்பான உள்நுழைவு அடித்தளத்தை அமைக்கவும்",
+          ],
+          [
+            "உயரமும் திருமண நிலையும் நிரப்பவும்",
+            "கல்வி, தொழில், மற்றும் வருமானத்தைச் சேர்க்கவும்",
+            "நகர், மாநிலம், மற்றும் சாதி விவரங்களை முடிக்கவும்",
+          ],
+        ]
+      : [
+          [
+            "Choose who this profile is being created for",
+            "Add name, gender, and date of birth",
+            "Provide community or family context",
+          ],
+          [
+            "Confirm email and mobile details",
+            "Create a stronger password",
+            "Set up a secure sign-in foundation",
+          ],
+          [
+            "Complete height and marital status",
+            "Add education, occupation, and income",
+            "Finish city, state, and caste details",
+          ],
         ];
   const copy =
     language === "ta"
@@ -150,14 +210,31 @@ export function Register() {
           fallbackError: "உங்கள் சுயவிவரத்தை உருவாக்க முடியவில்லை.",
           completeStep: "இந்த படியின் தேவையான புலங்களைச் சரிசெய்யவும்.",
           profileForPlaceholder: "இந்த சுயவிவரம் யாருக்காக?",
+          fullNamePlaceholder: "எ.கா. ப்ரியா லட்சுமி",
           genderPlaceholder: "பாலினத்தைத் தேர்ந்தெடுக்கவும்",
+          datePlaceholder: "பிறந்த தேதியைத் தேர்ந்தெடுக்கவும்",
           maritalPlaceholder: "திருமண நிலையைத் தேர்ந்தெடுக்கவும்",
           heightPlaceholder: "உயரத்தைத் தேர்ந்தெடுக்கவும்",
           selectPlaceholder: "தேர்ந்தெடுக்கவும்",
+          emailPlaceholder: "பெயர்@உதாரணம்.com",
           communityHint: "தமிழ் சமூகம் அல்லது குடும்ப பின்னணி",
           phoneHint: "10 இலக்க கைபேசி எண்",
-          incomeHint: "உதாரணம்: ₹10-12 லட்சம்",
+          passwordPlaceholder: "வலுவான கடவுச்சொல்லை உருவாக்கவும்",
+          confirmPasswordPlaceholder: "கடவுச்சொல்லை மீண்டும் உள்ளிடவும்",
+          educationPlaceholder: "எ.கா. பி.டெக் / எம்.பி.ஏ",
+          occupationPlaceholder: "எ.கா. மென்பொருள் பொறியாளர்",
+          incomeHint: "சரியான தேடல் மற்றும் வடிகட்டலுக்காக அருகிலான வருமான வரம்பைத் தேர்ந்தெடுக்கவும்",
+          incomePlaceholder: "வருடாந்திர வருமானத்தைத் தேர்ந்தெடுக்கவும்",
+          cityPlaceholder: "எ.கா. சென்னை",
+          statePlaceholder: "எ.கா. தமிழ்நாடு",
+          castePlaceholder: "எ.கா. ஐயர்",
           secureAccount: "பாதுகாப்பான கணக்கு",
+          signInCardTitle: "ஏற்கனவே கணக்கு தொடங்கியுள்ளீர்களா?",
+          signInCardDescription:
+            "டாஷ்போர்டை அணுக, சுயவிவரத்தைத் தொடர்ந்து நிரப்ப, மற்றும் உறுப்பினர் செயல்பாட்டைப் பார்க்க உள்நுழையவும்.",
+          signInCardAction: "உள்நுழையவும்",
+          mobileSignInPrompt: "ஏற்கனவே கணக்கு உள்ளதா?",
+          mobileSignInLink: "உள்நுழையவும்",
           backToHome: t("register.back.to.home"),
           backToPrevious: t("register.back.to.previous"),
         }
@@ -188,17 +265,48 @@ export function Register() {
           fallbackError: "Unable to create your profile.",
           completeStep: "Please correct the required fields in this step.",
           profileForPlaceholder: "Who is this profile for?",
+          fullNamePlaceholder: "e.g. Priya Lakshmi",
           genderPlaceholder: "Select gender",
+          datePlaceholder: "Select date",
           maritalPlaceholder: "Select marital status",
           heightPlaceholder: "Select height",
           selectPlaceholder: "Select",
+          emailPlaceholder: "name@example.com",
           communityHint: "Tamil community or family background",
           phoneHint: "10-digit mobile number",
-          incomeHint: "Example: ₹10-12 Lakhs",
+          passwordPlaceholder: "Create a strong password",
+          confirmPasswordPlaceholder: "Re-enter your password",
+          educationPlaceholder: "e.g. B.Tech / MBA",
+          occupationPlaceholder: "e.g. Software Engineer",
+          incomeHint: "Choose the closest income range for cleaner search and filtering.",
+          incomePlaceholder: "Select annual income",
+          cityPlaceholder: "e.g. Chennai",
+          statePlaceholder: "e.g. Tamil Nadu",
+          castePlaceholder: "e.g. Iyer",
           secureAccount: "Secure account",
+          signInCardTitle: "Already started your account?",
+          signInCardDescription:
+            "Sign in to access your dashboard, continue profile setup, and review your member activity.",
+          signInCardAction: "Sign in",
+          mobileSignInPrompt: "Already have an account?",
+          mobileSignInLink: "Sign in",
           backToHome: t("register.back.to.home"),
           backToPrevious: t("register.back.to.previous"),
         };
+
+  const stepCompletionRatios = PROGRESS_STEP_KEYS.map((stepKey) => {
+      const fieldKeys = PROGRESS_FIELDS[stepKey];
+      const completedCount = fieldKeys.filter(
+        (fieldKey) => !validateField(fieldKey, formData),
+      ).length;
+
+      return completedCount / fieldKeys.length;
+    });
+  const progressPercentage = Math.round(
+    (stepCompletionRatios.reduce((total, ratio) => total + ratio, 0) /
+      stepCompletionRatios.length) *
+      100,
+  );
 
   function validateField(
     key: RegisterFieldKey,
@@ -221,6 +329,11 @@ export function Register() {
           return language === "ta"
             ? "பெயரில் எழுத்துகள், இடைவெளி, மற்றும் பொதுவான குறியீடுகள் மட்டும் பயன்படுத்தவும்."
             : "Use letters, spaces, and common punctuation for your name.";
+        }
+        if (!hasFullNameParts(value)) {
+          return language === "ta"
+            ? "முதல் பெயரும் கடைசி பெயரும் உள்ள முழுப் பெயரை உள்ளிடவும்."
+            : "Enter your first and last name.";
         }
         return undefined;
       case "gender":
@@ -292,7 +405,7 @@ export function Register() {
             ? "உயரத்தைத் தேர்ந்தெடுக்கவும்."
             : "Select your height.";
       case "maritalStatus":
-        return value
+        return isProfileOption(value, MARITAL_STATUS_OPTIONS)
           ? undefined
           : language === "ta"
             ? "திருமண நிலையைத் தேர்ந்தெடுக்கவும்."
@@ -319,11 +432,12 @@ export function Register() {
         if (!value) {
           return undefined;
         }
-        return value.length > 80
-          ? language === "ta"
-            ? "வருமான விவரத்தை 80 எழுத்துகளுக்குள் வைத்திருக்கவும்."
-            : "Keep the income summary under 80 characters."
-          : undefined;
+        if (!isProfileOption(value, ANNUAL_INCOME_OPTIONS)) {
+          return language === "ta"
+            ? "சரியான வருடாந்திர வருமான வரம்பைத் தேர்ந்தெடுக்கவும்."
+            : "Select a valid annual income range.";
+        }
+        return undefined;
       case "city":
         if (!hasMeaningfulText(value)) {
           return language === "ta" ? "நகரத்தை உள்ளிடவும்." : "Enter your city.";
@@ -471,125 +585,129 @@ export function Register() {
     <PageTransition>
       <div className="page-shell px-4 py-8 sm:px-6 sm:py-10">
         <div className="section-shell">
-          <div className="grid gap-8 lg:grid-cols-[0.48fr_0.95fr] lg:gap-10">
-            <div className="hidden lg:block">
-              <div className="hero-surface h-full p-8 xl:p-10">
-                <span className="eyebrow-pill">{copy.createProfile}</span>
-                <div className="mt-8">
-                  <h1
-                    className="text-5xl text-slate-900 xl:text-[4rem]"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
+          <motion.div
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="mb-6"
+          >
+            <button
+              onClick={() => {
+                if (step === 1) {
+                  router.push("/");
+                  return;
+                }
+                setStep((current) => (current - 1) as 1 | 2);
+              }}
+              className="btn-nav-back"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>{step === 1 ? copy.backToHome : copy.backToPrevious}</span>
+            </button>
+          </motion.div>
+
+          <div className="grid items-stretch gap-8 lg:grid-cols-2 lg:gap-10">
+            <div className="hidden lg:flex lg:flex-col">
+              <div className="hero-surface flex h-full flex-col p-6 xl:p-7">
+                <span className="eyebrow-pill self-start">{copy.createProfile}</span>
+                <div className="mt-5">
+                  <h1 className="max-w-lg text-5xl text-slate-900 xl:text-[4rem]">
                     {copy.heroTitle}
                   </h1>
-                  <p className="mt-5 text-base leading-relaxed text-slate-600 xl:text-lg">
-                    {copy.heroDescription}
-                  </p>
                 </div>
 
-                <div className="mt-10 grid gap-4">
+                <div className="panel-muted mt-6 p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="section-label">
+                      {language === "ta" ? `படி ${step} / 3` : `Step ${step} of 3`}
+                    </span>
+                    <span className="tag-pill">
+                      {progressPercentage}%
+                    </span>
+                  </div>
+                  <div className="mt-4 flex items-start gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#B91C1C] text-sm font-semibold text-white shadow-[0_12px_24px_rgba(185,28,28,0.2)]">
+                      {step}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-display text-xl text-slate-900">
+                        {stepLabels[step - 1]}
+                      </div>
+                      <div className="mt-3 grid gap-2">
+                        {stepFocusItems[step - 1].map((item) => (
+                          <div key={item} className="flex items-start gap-2.5">
+                            <div className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[#B91C1C]" />
+                            <p className="text-sm leading-6 text-slate-600">{item}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-auto pt-6">
+                    <div className="panel-muted flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#B91C1C]/[0.08] text-[#B91C1C]">
+                          <ShieldCheck className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-slate-800">
+                            {copy.signInCardTitle}
+                          </div>
+                          <p className="mt-1 text-sm leading-relaxed text-slate-500">
+                            {copy.signInCardDescription}
+                          </p>
+                        </div>
+                      </div>
+
+                      <Link
+                        href="/login"
+                        className="btn-ghost shrink-0 px-4 py-2.5 text-sm font-semibold"
+                      >
+                        {copy.signInCardAction}
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-2">
                   {stepLabels.map((label, index) => {
-                    const position = (index + 1) as 1 | 2 | 3;
+                    const position = index + 1;
                     const active = position === step;
-                    const complete = position < step;
 
                     return (
                       <div
                         key={label}
-                        className={`rounded-[1.5rem] border px-5 py-5 transition-all ${
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${
                           active
-                            ? "border-[#B91C1C]/18 bg-white shadow-[0_18px_34px_rgba(15,23,42,0.08)]"
-                            : "border-[#B91C1C]/10 bg-[#B91C1C]/[0.04]"
+                            ? "border-[#B91C1C]/18 bg-[#B91C1C]/[0.06] text-[#991B1B]"
+                            : "border-[#B91C1C]/10 bg-white/80 text-slate-500"
                         }`}
                       >
-                        <div className="flex items-start gap-4">
-                          <div
-                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm font-semibold ${
-                              complete
-                                ? "bg-emerald-600 text-white"
-                                : active
-                                  ? "bg-[#B91C1C] text-white"
-                                  : "bg-white text-slate-500"
-                            }`}
-                          >
-                            {complete ? <Check className="h-4 w-4" /> : position}
-                          </div>
-                          <div>
-                            <div
-                              className="text-lg text-slate-900"
-                              style={{ fontFamily: "var(--font-display)" }}
-                            >
-                              {label}
-                            </div>
-                            <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-                              {stepDescriptions[index]}
-                            </p>
-                          </div>
-                        </div>
+                        <span
+                          className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold ${
+                            active
+                              ? "bg-[#B91C1C] text-white"
+                              : "bg-slate-100 text-slate-500"
+                          }`}
+                        >
+                          {position}
+                        </span>
+                        <span className="font-medium">{label}</span>
                       </div>
                     );
                   })}
                 </div>
 
-                <div className="panel-surface mt-8 p-5">
-                  <div className="flex items-center gap-2.5">
-                    <ShieldCheck className="h-4 w-4 text-[#B91C1C]" />
-                    <div
-                      className="text-xl text-slate-900"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
-                      {copy.reviewReadyTitle}
-                    </div>
-                  </div>
-                  <div className="mt-4 space-y-3">
-                    {copy.reviewReadyPoints.map((point) => (
-                      <div key={point} className="flex items-start gap-3">
-                        <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#B91C1C]/10 text-[#B91C1C]">
-                          <Sparkles className="h-3.5 w-3.5" />
-                        </div>
-                        <p className="text-sm leading-relaxed text-slate-600">{point}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
 
             <div>
               <motion.div
-                initial={{ opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="mb-6 flex items-center justify-between"
-              >
-                <button
-                  onClick={() => {
-                    if (step === 1) {
-                      router.push("/");
-                      return;
-                    }
-
-                    setStep((current) => (current - 1) as 1 | 2);
-                  }}
-                  className="inline-flex items-center gap-2 rounded-full border border-[#B91C1C]/10 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  <span>{step === 1 ? copy.backToHome : copy.backToPrevious}</span>
-                </button>
-                <Link href="/">
-                  <Logo size="medium" showText={false} variant="light" />
-                </Link>
-              </motion.div>
-
-              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="panel-surface p-6 sm:p-8 md:p-10"
+                className="panel-surface flex h-full flex-col p-6 sm:p-8 md:p-10"
               >
                 <div className="section-label">{copy.guideLabel}</div>
-                <h1
-                  className="mt-3 text-4xl text-slate-900"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
+                <h1 className="mt-3 font-display text-4xl text-slate-900">
                   {t("register.title")}
                 </h1>
                 <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
@@ -597,16 +715,16 @@ export function Register() {
                 </p>
 
                 <div className="mt-7">
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div className="progress-track">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${(step / 3) * 100}%` }}
-                      className="h-1.5 rounded-full bg-[#B91C1C]"
+                      animate={{ width: `${progressPercentage}%` }}
+                      className="progress-fill"
                       transition={{ duration: 0.3, ease: "easeOut" }}
                     />
                   </div>
 
-                  <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+                  <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
                     {stepLabels.map((label, index) => {
                       const position = index + 1;
                       const active = position === step;
@@ -615,14 +733,14 @@ export function Register() {
                       return (
                         <div
                           key={label}
-                          className={`rounded-2xl border px-3 py-3 sm:px-4 sm:py-3.5 ${
+                          className={`rounded-xl border px-2 py-2.5 text-center sm:px-4 sm:py-3.5 sm:text-left ${
                             active
                               ? "border-[#B91C1C]/16 bg-[#B91C1C]/[0.05]"
                               : "border-slate-200/80 bg-slate-50/70"
                           }`}
                         >
                           <div
-                            className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${
+                            className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold sm:h-8 sm:w-8 sm:text-xs ${
                               complete
                                 ? "bg-emerald-600 text-white"
                                 : active
@@ -630,9 +748,9 @@ export function Register() {
                                   : "bg-slate-100 text-slate-400"
                             }`}
                           >
-                            {complete ? <Check className="h-3.5 w-3.5" /> : position}
+                            {complete ? <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> : position}
                           </div>
-                          <div className="mt-2 text-[13px] font-medium text-slate-700">
+                          <div className="mt-2 text-[11px] font-semibold leading-[1.2] text-slate-700 sm:text-[13px] sm:leading-normal">
                             {label}
                           </div>
                         </div>
@@ -676,6 +794,7 @@ export function Register() {
                             onChange={(event) => updateField("fullName", event.target.value)}
                             autoComplete="name"
                             aria-invalid={Boolean(fieldErrors.fullName)}
+                            placeholder={copy.fullNamePlaceholder}
                             required
                           />
                         </Field>
@@ -698,6 +817,7 @@ export function Register() {
                             value={formData.dateOfBirth}
                             onChange={(event) => updateField("dateOfBirth", event.target.value)}
                             aria-invalid={Boolean(fieldErrors.dateOfBirth)}
+                            placeholder={copy.datePlaceholder}
                             required
                           />
                         </Field>
@@ -735,6 +855,7 @@ export function Register() {
                               onChange={(event) => updateField("email", event.target.value)}
                               autoComplete="email"
                               aria-invalid={Boolean(fieldErrors.email)}
+                              placeholder={copy.emailPlaceholder}
                               required
                             />
                           </Field>
@@ -747,21 +868,26 @@ export function Register() {
                             <InputControl
                               type="tel"
                               value={formData.phone}
-                              onChange={(event) => updateField("phone", event.target.value)}
+                              onChange={(event) =>
+                                updateField("phone", sanitizePhoneInput(event.target.value))
+                              }
                               autoComplete="tel"
                               aria-invalid={Boolean(fieldErrors.phone)}
                               placeholder={copy.phoneHint}
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              maxLength={10}
                               required
                             />
                           </Field>
 
                           <Field label={t("register.password")} error={fieldErrors.password}>
-                            <InputControl
-                              type="password"
+                            <PasswordControl
                               value={formData.password}
                               onChange={(event) => updateField("password", event.target.value)}
                               autoComplete="new-password"
                               aria-invalid={Boolean(fieldErrors.password)}
+                              placeholder={copy.passwordPlaceholder}
                               required
                             />
                           </Field>
@@ -770,21 +896,21 @@ export function Register() {
                             label={t("register.confirm.password")}
                             error={fieldErrors.confirmPassword}
                           >
-                            <InputControl
-                              type="password"
+                            <PasswordControl
                               value={formData.confirmPassword}
                               onChange={(event) =>
                                 updateField("confirmPassword", event.target.value)
                               }
                               autoComplete="new-password"
                               aria-invalid={Boolean(fieldErrors.confirmPassword)}
+                              placeholder={copy.confirmPasswordPlaceholder}
                               required
                             />
                           </Field>
                         </div>
 
                         <div className="panel-muted flex items-start gap-3 p-4">
-                          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#B91C1C]/[0.08] text-[#B91C1C]">
+                          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#B91C1C]/[0.08] text-[#B91C1C]">
                             <ShieldCheck className="h-4 w-4" />
                           </div>
                           <div>
@@ -838,11 +964,11 @@ export function Register() {
                               required
                             >
                               <option value="">{copy.maritalPlaceholder}</option>
-                              <option value="Never Married">
-                                {t("register.never.married")}
-                              </option>
-                              <option value="Divorced">{t("register.divorced")}</option>
-                              <option value="Widowed">{t("register.widowed")}</option>
+                              {MARITAL_STATUS_OPTIONS.map((status) => (
+                                <option key={status} value={status}>
+                                  {translateDisplayValue(status, language)}
+                                </option>
+                              ))}
                             </SelectControl>
                           </Field>
 
@@ -851,6 +977,7 @@ export function Register() {
                               value={formData.education}
                               onChange={(event) => updateField("education", event.target.value)}
                               aria-invalid={Boolean(fieldErrors.education)}
+                              placeholder={copy.educationPlaceholder}
                               required
                             />
                           </Field>
@@ -860,6 +987,7 @@ export function Register() {
                               value={formData.occupation}
                               onChange={(event) => updateField("occupation", event.target.value)}
                               aria-invalid={Boolean(fieldErrors.occupation)}
+                              placeholder={copy.occupationPlaceholder}
                               required
                             />
                           </Field>
@@ -869,12 +997,20 @@ export function Register() {
                             error={fieldErrors.income}
                             hint={copy.incomeHint}
                           >
-                            <InputControl
+                            <SelectControl
                               value={formData.income}
-                              onChange={(event) => updateField("income", event.target.value)}
+                              onChange={(event) =>
+                                updateField("income", event.target.value)
+                              }
                               aria-invalid={Boolean(fieldErrors.income)}
-                              placeholder={copy.incomeHint}
-                            />
+                            >
+                              <option value="">{copy.incomePlaceholder}</option>
+                              {ANNUAL_INCOME_OPTIONS.map((incomeRange) => (
+                                <option key={incomeRange} value={incomeRange}>
+                                  {translateDisplayValue(incomeRange, language)}
+                                </option>
+                              ))}
+                            </SelectControl>
                           </Field>
 
                           <Field label={t("register.city")} error={fieldErrors.city}>
@@ -882,6 +1018,7 @@ export function Register() {
                               value={formData.city}
                               onChange={(event) => updateField("city", event.target.value)}
                               aria-invalid={Boolean(fieldErrors.city)}
+                              placeholder={copy.cityPlaceholder}
                               required
                             />
                           </Field>
@@ -891,6 +1028,7 @@ export function Register() {
                               value={formData.state}
                               onChange={(event) => updateField("state", event.target.value)}
                               aria-invalid={Boolean(fieldErrors.state)}
+                              placeholder={copy.statePlaceholder}
                               required
                             />
                           </Field>
@@ -900,13 +1038,14 @@ export function Register() {
                               value={formData.caste}
                               onChange={(event) => updateField("caste", event.target.value)}
                               aria-invalid={Boolean(fieldErrors.caste)}
+                              placeholder={copy.castePlaceholder}
                               required
                             />
                           </Field>
                         </div>
 
                         <div className="panel-muted flex items-start gap-3 p-4">
-                          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#B91C1C]/[0.08] text-[#B91C1C]">
+                          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#B91C1C]/[0.08] text-[#B91C1C]">
                             <Sparkles className="h-4 w-4" />
                           </div>
                           <div>
@@ -932,6 +1071,16 @@ export function Register() {
                       <span>{step === 3 ? copy.create : copy.continue}</span>
                     )}
                   </button>
+
+                  <div className="text-center text-sm text-slate-500 lg:hidden">
+                    {copy.mobileSignInPrompt}{" "}
+                    <Link
+                      href="/login"
+                      className="font-semibold text-[#B91C1C] transition-colors hover:text-[#991B1B]"
+                    >
+                      {copy.mobileSignInLink}
+                    </Link>
+                  </div>
                 </form>
               </motion.div>
             </div>

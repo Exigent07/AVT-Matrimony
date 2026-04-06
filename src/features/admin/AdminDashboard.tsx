@@ -225,8 +225,8 @@ export function AdminDashboard({ data }: AdminDashboardProps) {
             </div>
           </section>
 
-          <section className="toolbar-surface mt-6 p-1.5">
-            <div className="flex flex-wrap gap-1">
+          <section className="mt-6 flex">
+            <div className="tab-shelf">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -386,7 +386,7 @@ function OverviewPanel({ data }: { data: AdminDashboardData }) {
             .map((member) => (
               <div
                 key={member.userId}
-                className="panel-muted flex items-center justify-between px-4 py-3.5"
+                className="interactive-row flex items-center justify-between"
               >
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-slate-900 truncate">{member.fullName}</div>
@@ -399,7 +399,7 @@ function OverviewPanel({ data }: { data: AdminDashboardData }) {
               </div>
             ))}
           {data.users.every((member) => member.profileStatus !== "PENDING") ? (
-            <div className="rounded-xl border border-dashed border-slate-200 px-4 py-7 text-center text-sm text-slate-400">
+            <div className="list-empty">
               {language === "ta" ? "தற்போது பரிசீலனைக்காக காத்திருக்கும் உறுப்பினர் சுயவிவரங்கள் இல்லை." : "No member profiles are waiting for moderation right now."}
             </div>
           ) : null}
@@ -415,7 +415,7 @@ function OverviewPanel({ data }: { data: AdminDashboardData }) {
             .filter((interest) => interest.status === "ACCEPTED")
             .slice(0, 5)
             .map((interest) => (
-              <div key={interest.id} className="panel-muted px-4 py-3.5">
+              <div key={interest.id} className="interactive-row">
                 <div className="text-sm font-medium text-slate-900">
                   {language === "ta" ? `${interest.fromUser.name} இருந்து ${interest.toUser.name} வரை` : `${interest.fromUser.name} to ${interest.toUser.name}`}
                 </div>
@@ -425,7 +425,7 @@ function OverviewPanel({ data }: { data: AdminDashboardData }) {
               </div>
             ))}
           {data.interests.every((interest) => interest.status !== "ACCEPTED") ? (
-            <div className="rounded-xl border border-dashed border-slate-200 px-4 py-7 text-center text-sm text-slate-400">
+            <div className="list-empty">
               {language === "ta" ? "தொடர்பு பகிர்வுக்காக காத்திருக்கும் ஏற்றுக்கொள்ளப்பட்ட ஆர்வக் கோரிக்கைகள் இல்லை." : "No accepted interest requests are waiting for contact release."}
             </div>
           ) : null}
@@ -443,11 +443,11 @@ function MemberRow({
 }) {
   const { language } = useLanguage();
   return (
-    <div className="panel-muted p-5">
+    <div className="panel-muted rounded-[1.4rem] p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-medium text-slate-900">{member.fullName}</h3>
+            <h3 className="text-base font-semibold text-slate-900">{member.fullName}</h3>
             <StatusBadge label={member.profileStatus.toLowerCase()} tone={getProfileTone(member.profileStatus)} />
             <StatusBadge label={member.accountStatus.toLowerCase()} tone={member.accountStatus === "ACTIVE" ? "success" : "danger"} />
           </div>
@@ -463,7 +463,7 @@ function MemberRow({
           <button
             onClick={onApprove}
             disabled={loading || member.profileStatus === "APPROVED"}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
+            className="btn-success px-3 py-2 text-xs"
           >
             <UserCheck className="h-3.5 w-3.5" />
             {language === "ta" ? "அங்கீகரி" : "Approve"}
@@ -471,7 +471,7 @@ function MemberRow({
           <button
             onClick={onReject}
             disabled={loading || member.profileStatus === "REJECTED"}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-800 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-slate-900 disabled:opacity-60"
+            className="btn-caution px-3 py-2 text-xs"
           >
             <UserX className="h-3.5 w-3.5" />
             {language === "ta" ? "நிராகரி" : "Reject"}
@@ -484,7 +484,7 @@ function MemberRow({
           <button
             onClick={onDelete}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-100 disabled:opacity-60"
+            className="btn-danger px-3 py-2 text-xs"
           >
             <Trash2 className="h-3.5 w-3.5" />
             {language === "ta" ? "நீக்கு" : "Delete"}
@@ -502,11 +502,11 @@ function InterestRow({
 }) {
   const { language } = useLanguage();
   return (
-    <div className="panel-muted p-5">
+    <div className="panel-muted rounded-[1.4rem] p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-medium text-slate-900">
+            <h3 className="text-base font-semibold text-slate-900">
               {language === "ta" ? `${interest.fromUser.name} இருந்து ${interest.toUser.name} வரை` : `${interest.fromUser.name} to ${interest.toUser.name}`}
             </h3>
             <StatusBadge label={interest.status.toLowerCase()} tone={getInterestTone(interest.status)} />
@@ -518,7 +518,7 @@ function InterestRow({
         <button
           onClick={onShare}
           disabled={interest.status !== "ACCEPTED" || loading}
-          className="btn-primary flex-shrink-0 px-4 py-2.5 text-xs"
+          className="btn-success flex-shrink-0 px-4 py-2.5 text-xs"
         >
           {language === "ta" ? "தொடர்பு விவரங்களை வெளியிடு" : "Release Contact Details"}
         </button>

@@ -142,8 +142,7 @@ export function Home({ viewer }: HomeProps) {
                   initial={{ opacity: 0, y: 22 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.18 }}
-                  className="mt-6 text-4xl text-slate-900 md:text-5xl lg:text-[4.15rem]"
-                  style={{ fontFamily: "var(--font-display)" }}
+                  className="mt-6 text-4xl text-slate-900 md:text-5xl lg:text-[4.15rem] lg:leading-[0.96]"
                 >
                   {t("home.hero.title")}
                 </motion.h1>
@@ -179,18 +178,51 @@ export function Home({ viewer }: HomeProps) {
                 </motion.div>
 
                 <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.4, delay: 0.5 }}
+                  className="mt-3"
+                >
+                  <button
+                    onClick={() => router.push("/login")}
+                    className="group inline-flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-[#B91C1C]"
+                  >
+                    {language === "ta"
+                      ? "ஏற்கனவே உறுப்பினரா? உங்கள் பயணத்தை தொடரவும்"
+                      : "Already on your journey? Continue here"}
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  </button>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.42 }}
+                  className="mt-8 overflow-hidden rounded-[1.75rem] border border-[#B91C1C]/10 bg-[#f5ece0] shadow-[0_18px_36px_rgba(15,23,42,0.08)]"
+                >
+                  <img
+                    src="/images/hero-decor.png"
+                    alt={language === "ta" ? "தமிழ் திருமண அலங்காரம்" : "Traditional Tamil wedding décor"}
+                    className="aspect-[16/7] w-full object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none';
+                    }}
+                  />
+                </motion.div>
+
+                <motion.div
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.46 }}
-                  className="mt-10 grid gap-3 sm:grid-cols-3"
+                  className="mt-5 grid gap-3 sm:grid-cols-3"
                 >
                   {copy.heroChips.map((item) => (
                     <div
                       key={item}
                       className="rounded-[1.35rem] border border-[#B91C1C]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(250,245,237,0.92))] px-4 py-4 shadow-[0_14px_28px_rgba(15,23,42,0.04)]"
                     >
-                      <div className="h-px w-12 bg-gradient-to-r from-[#B91C1C]/45 to-transparent" />
-                      <div className="mt-3 text-sm font-semibold leading-6 text-slate-900">{item}</div>
+                      <div className="h-[1.5px] w-10 rounded-full bg-gradient-to-r from-[#B91C1C]/50 to-transparent" />
+                      <div className="mt-3 text-sm font-semibold leading-snug text-slate-900">{item}</div>
                     </div>
                   ))}
                 </motion.div>
@@ -209,7 +241,7 @@ export function Home({ viewer }: HomeProps) {
                     <div className="section-label">{copy.whyLabel}</div>
                     <h2 className="mt-2 text-2xl text-slate-900 md:text-3xl">{copy.whyTitle}</h2>
                   </div>
-                  <div className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-[#B91C1C] text-white shadow-[0_18px_34px_rgba(185,28,28,0.18)] sm:flex">
+                  <div className="hidden h-11 w-11 items-center justify-center rounded-xl bg-[#B91C1C] text-white shadow-[0_14px_28px_rgba(185,28,28,0.18)] sm:flex">
                     <AnimatedHeartIcon className="h-5 w-5" active />
                   </div>
                 </div>
@@ -230,10 +262,10 @@ export function Home({ viewer }: HomeProps) {
 
               <div className="panel-surface p-5 md:p-6">
                 <div className="section-label">{copy.storyLabel}</div>
-                <div className="mt-3 text-xl text-slate-900 md:text-2xl" style={{ fontFamily: "var(--font-display)" }}>
+                <div className="mt-2 font-display text-xl text-slate-900 md:text-2xl">
                   {stories[0]?.names}
                 </div>
-                <p className="mt-3 text-sm italic leading-relaxed text-slate-600">
+                <p className="mt-2.5 text-sm italic leading-relaxed text-slate-600">
                   &ldquo;{stories[0]?.quote}&rdquo;
                 </p>
                 <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
@@ -261,17 +293,14 @@ export function Home({ viewer }: HomeProps) {
                     transition={{ duration: 0.4, delay: 0.42 + index * 0.06 }}
                     className="stat-surface text-center"
                   >
-                    <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#B91C1C] to-[#7F1D1D] text-white shadow-[0_14px_28px_rgba(185,28,28,0.16)]">
+                    <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#B91C1C] to-[#7F1D1D] text-white shadow-[0_12px_24px_rgba(185,28,28,0.16)]">
                       {stat.icon === Heart ? (
                         <AnimatedHeartIcon className="h-[18px] w-[18px]" active />
                       ) : (
                         <stat.icon className="h-[18px] w-[18px]" />
                       )}
                     </div>
-                    <div
-                      className="mt-4 text-3xl font-semibold text-[#B91C1C]"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
+                    <div className="mt-4 font-display text-3xl font-semibold text-[#B91C1C]">
                       {stat.value}
                     </div>
                     <div className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
@@ -284,7 +313,7 @@ export function Home({ viewer }: HomeProps) {
 
             <div className="panel-muted p-5 md:p-6">
               <div className="section-label">{copy.qualityLabel}</div>
-              <h2 className="mt-2 text-2xl text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
+              <h2 className="mt-2 text-2xl text-slate-900">
                 {copy.qualityTitle}
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-slate-600">
@@ -318,7 +347,7 @@ export function Home({ viewer }: HomeProps) {
               className="mx-auto max-w-2xl text-center"
             >
               <span className="section-label">{t("home.how.it.works.title")}</span>
-              <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
+              <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl">
                 {copy.journeyTitle}
               </h2>
               <p className="mt-3 text-sm text-slate-500 md:text-base">
@@ -326,7 +355,7 @@ export function Home({ viewer }: HomeProps) {
               </p>
             </motion.div>
 
-            <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
+            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5">
               {[
                 { num: "01", title: t("home.how.step1"), desc: t("home.how.step1.desc") },
                 { num: "02", title: t("home.how.step2"), desc: t("home.how.step2.desc") },
@@ -338,14 +367,14 @@ export function Home({ viewer }: HomeProps) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: index * 0.08 }}
-                  className="panel-muted group relative overflow-hidden p-6 text-center md:p-8"
+                  className="panel-muted group relative overflow-hidden p-5 md:p-7"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-[#B91C1C]/[0.04] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   <div className="relative z-10">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#B91C1C] to-[#7F1D1D] text-sm font-semibold text-white shadow-[0_16px_30px_rgba(185,28,28,0.16)] md:h-14 md:w-14 md:text-base">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#B91C1C] to-[#7F1D1D] text-sm font-semibold text-white shadow-[0_12px_24px_rgba(185,28,28,0.16)]">
                       {step.num}
                     </div>
-                    <h3 className="mt-5 text-xl text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
+                    <h3 className="mt-4 text-xl text-slate-900">
                       {step.title}
                     </h3>
                     <p className="mt-2 text-sm leading-relaxed text-slate-500">{step.desc}</p>
@@ -359,7 +388,7 @@ export function Home({ viewer }: HomeProps) {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="mt-8 text-center md:mt-12"
+              className="mt-7 text-center md:mt-10"
             >
               <button
                 onClick={() => router.push("/how-it-works")}
@@ -380,7 +409,7 @@ export function Home({ viewer }: HomeProps) {
             className="mx-auto max-w-2xl text-center"
           >
             <span className="section-label">{copy.differenceLabel}</span>
-            <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
+            <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl">
               {copy.differenceTitle}
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-slate-500 md:text-base">
@@ -388,7 +417,7 @@ export function Home({ viewer }: HomeProps) {
             </p>
           </motion.div>
 
-          <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
+          <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
               {features.map((feature, index) => (
                 <motion.div
                   key={index}
@@ -400,8 +429,8 @@ export function Home({ viewer }: HomeProps) {
                 >
                   <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#B91C1C]/35 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   <div className="relative z-10">
-                    <div className="mb-5 h-1 w-14 rounded-full bg-[#B91C1C]" />
-                    <h3 className="text-xl text-[#B91C1C] md:text-2xl" style={{ fontFamily: "var(--font-display)" }}>
+                    <div className="mb-4 h-px w-10 rounded-full bg-[#B91C1C]/60" />
+                    <h3 className="text-xl text-[#B91C1C] md:text-2xl">
                       {feature.title}
                     </h3>
                     <p className="mt-2 text-sm leading-relaxed text-slate-500">{feature.description}</p>
@@ -421,7 +450,7 @@ export function Home({ viewer }: HomeProps) {
               className="mx-auto max-w-2xl text-center"
             >
               <span className="section-label">{copy.realConnectionsLabel}</span>
-              <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
+              <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl">
                 {t("header.success.stories")}
               </h2>
               <p className="mt-3 text-sm text-slate-500 md:text-base">
@@ -429,7 +458,7 @@ export function Home({ viewer }: HomeProps) {
               </p>
             </motion.div>
 
-            <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
+            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5">
               {stories.map((story, index) => (
                 <motion.div
                   key={index}
@@ -437,13 +466,13 @@ export function Home({ viewer }: HomeProps) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: index * 0.08 }}
-                  className="panel-muted group relative overflow-hidden p-6 md:p-8"
+                  className="panel-muted group relative overflow-hidden p-5 md:p-6"
                 >
                   <div className="relative z-10">
-                    <div className="text-4xl leading-none text-[#B91C1C]/20 md:text-5xl">&ldquo;</div>
-                    <p className="mt-2 text-sm italic leading-relaxed text-slate-600 md:mt-3">{story.quote}</p>
-                    <div className="mt-5 border-t border-slate-200/60 pt-4">
-                      <div className="text-lg text-[#B91C1C]" style={{ fontFamily: "var(--font-display)" }}>
+                    <div className="mb-3.5 h-[1.5px] w-8 rounded-full bg-[#B91C1C]/35" />
+                    <p className="text-sm italic leading-relaxed text-slate-600">{story.quote}</p>
+                    <div className="mt-4 border-t border-slate-100/80 pt-4">
+                      <div className="font-display text-base text-[#B91C1C]">
                         {story.names}
                       </div>
                       <div className="mt-0.5 text-xs text-slate-500">{story.location}</div>
@@ -458,7 +487,7 @@ export function Home({ viewer }: HomeProps) {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="mt-8 text-center md:mt-12"
+              className="mt-7 text-center md:mt-10"
             >
               <button
                 onClick={() => router.push("/stories")}

@@ -57,7 +57,7 @@ function HeaderShell({ children }: { children: React.ReactNode }) {
 function HeaderBrand({ href }: { href: string }) {
   return (
     <Link href={href} className="min-w-0 shrink-0 transition-opacity hover:opacity-90">
-      <Logo size="medium" showText={false} showTagline={false} />
+      <Logo size="small" showText={true} showTagline={false} />
     </Link>
   );
 }

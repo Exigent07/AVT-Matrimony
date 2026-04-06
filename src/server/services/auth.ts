@@ -1,9 +1,12 @@
 import { ProfileStatus, UserRole } from "@prisma/client";
 import type { z } from "zod";
 import {
+  normalizeAnnualIncome,
+  normalizeMaritalStatus,
+} from "@/lib/constants/profile-options";
+import {
   buildProfileCompletion,
   genderToDb,
-  normalizePhone,
   parseHeightToCentimeters,
 } from "@/lib/profile-utils";
 import { db } from "@/server/db";
@@ -107,12 +110,14 @@ export async function registerMember(input: RegisterInput) {
 
   const passwordHash = await hashPassword(input.password);
   const heightCm = parseHeightToCentimeters(input.height);
+  const maritalStatus = normalizeMaritalStatus(input.maritalStatus) ?? input.maritalStatus;
+  const annualIncome = normalizeAnnualIncome(input.income) ?? input.income;
   const isProfileComplete = buildProfileCompletion({
     fullName: input.fullName,
     dateOfBirth: input.dateOfBirth,
     gender: input.gender,
     height: input.height,
-    maritalStatus: input.maritalStatus,
+    maritalStatus,
     caste: input.caste,
     city: input.city,
     state: input.state,
@@ -123,7 +128,7 @@ export async function registerMember(input: RegisterInput) {
     profilePhotoUrl: null,
     about: null,
     partnerExpectations: null,
-    annualIncome: input.income,
+    annualIncome,
     community: input.community,
   });
 
@@ -132,7 +137,8 @@ export async function registerMember(input: RegisterInput) {
       email: input.email,
       passwordHash,
       fullName: input.fullName,
-      phone: normalizePhone(input.phone),
+      // input.phone has already been normalized by phoneSchema's .transform()
+      phone: input.phone,
       role: UserRole.MEMBER,
       profile: {
         create: {
@@ -142,15 +148,17 @@ export async function registerMember(input: RegisterInput) {
           dateOfBirth: new Date(input.dateOfBirth),
           heightCm,
           heightLabel: input.height,
-          maritalStatus: input.maritalStatus,
-          religion: "Hindu",
+          maritalStatus,
+          // Religion is intentionally left null at registration; the member
+          // fills it in when completing their profile via edit-profile.
+          religion: null,
           caste: input.caste,
           country: "India",
           state: input.state,
           city: input.city,
           education: input.education,
           occupation: input.occupation,
-          annualIncome: input.income || null,
+          annualIncome,
           about: null,
           partnerExpectations: null,
           isProfileComplete,

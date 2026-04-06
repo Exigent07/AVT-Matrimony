@@ -6,6 +6,19 @@ import {
 import type { Prisma } from "@prisma/client";
 import type { z } from "zod";
 import {
+  normalizeAnnualIncome,
+  normalizeBodyType,
+  normalizeComplexion,
+  normalizeDiet,
+  normalizeEmployedIn,
+  normalizeFamilyStatus,
+  normalizeFamilyType,
+  normalizeHabitFrequency,
+  normalizeMaritalStatus,
+  normalizePhysicalStatus,
+  normalizeResidencyStatus,
+} from "@/lib/constants/profile-options";
+import {
   buildProfileCompletion,
   buildProfileCompletionState,
   genderToDb,
@@ -144,40 +157,33 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   const user = await getUserWithProfileOrThrow(userId);
   const profile = user.profile!;
 
-  const [interestRequests, interestedInYou] = await Promise.all([
-    db.interestRequest.findMany({
-      where: {
-        OR: [{ fromUserId: userId }, { toUserId: userId }],
-      },
-      include: interestRequestInclude,
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
-    db.interestRequest.findMany({
-      where: {
-        toUserId: userId,
-        status: {
-          in: [
-            InterestRequestStatus.PENDING,
-            InterestRequestStatus.ACCEPTED,
-            InterestRequestStatus.CONTACT_SHARED,
-          ],
-        },
-      },
-      include: interestRequestInclude,
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 6,
-    }),
-  ]);
+  // Single query fetches everything needed — interestedInYou is derived in memory.
+  const interestRequests = await db.interestRequest.findMany({
+    where: {
+      OR: [{ fromUserId: userId }, { toUserId: userId }],
+    },
+    include: interestRequestInclude,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  // Derive "interested in you" from the already-fetched requests (subset):
+  // requests where this user is the recipient and the sender hasn't been declined.
+  const interestedInYou = interestRequests
+    .filter(
+      (request) =>
+        request.toUserId === userId &&
+        request.status !== InterestRequestStatus.DECLINED,
+    )
+    .slice(0, 6);
 
   const recentMatchesMap = new Map<string, ProfileCard>();
   interestRequests
-    .filter((request) =>
-      request.status === InterestRequestStatus.ACCEPTED ||
-      request.status === InterestRequestStatus.CONTACT_SHARED,
+    .filter(
+      (request) =>
+        request.status === InterestRequestStatus.ACCEPTED ||
+        request.status === InterestRequestStatus.CONTACT_SHARED,
     )
     .forEach((request) => {
       const counterpart = request.fromUserId === userId ? request.toUser : request.fromUser;
@@ -354,6 +360,16 @@ export async function getProfileDetailById(userId: string, targetId: string) {
 }
 
 export async function getInterestItems(userId: string) {
+  // Verify the user exists before querying their interest requests.
+  const userExists = await db.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+
+  if (!userExists) {
+    throw new AppError("User not found.", 404);
+  }
+
   const requests = await db.interestRequest.findMany({
     where: {
       OR: [{ fromUserId: userId }, { toUserId: userId }],
@@ -386,6 +402,23 @@ export async function updateProfile(userId: string, input: ProfileUpdateInput) {
   const heightCm = parseHeightToCentimeters(input.height);
   const partnerHeightCm = parseHeightToCentimeters(input.partnerHeight);
   const dateOfBirth = new Date(input.dateOfBirth);
+  const maritalStatus = normalizeMaritalStatus(input.maritalStatus) ?? input.maritalStatus;
+  const annualIncome = normalizeAnnualIncome(input.income) ?? input.income;
+  const residencyStatus =
+    normalizeResidencyStatus(input.residencyStatus) ?? input.residencyStatus;
+  const employedIn = normalizeEmployedIn(input.employedIn) ?? input.employedIn;
+  const familyStatus = normalizeFamilyStatus(input.familyStatus) ?? input.familyStatus;
+  const familyType = normalizeFamilyType(input.familyType) ?? input.familyType;
+  const diet = normalizeDiet(input.diet) ?? input.diet;
+  const drinking = normalizeHabitFrequency(input.drinking) ?? input.drinking;
+  const smoking = normalizeHabitFrequency(input.smoking) ?? input.smoking;
+  const bodyType = normalizeBodyType(input.bodyType) ?? input.bodyType;
+  const complexion = normalizeComplexion(input.complexion) ?? input.complexion;
+  const physicalStatus =
+    normalizePhysicalStatus(input.physicalStatus) ?? input.physicalStatus;
+  const partnerMaritalStatus =
+    normalizeMaritalStatus(input.partnerMaritalStatus) ?? input.partnerMaritalStatus;
+  const partnerIncome = normalizeAnnualIncome(input.partnerIncome) ?? input.partnerIncome;
   const nextStatus =
     currentProfile.status === ProfileStatus.APPROVED ||
     currentProfile.status === ProfileStatus.REJECTED
@@ -396,7 +429,7 @@ export async function updateProfile(userId: string, input: ProfileUpdateInput) {
     gender: input.gender,
     dateOfBirth,
     height: input.height,
-    maritalStatus: input.maritalStatus,
+    maritalStatus,
     profilePhotoUrl: input.profilePhotoUrl,
     community: input.community,
     religion: input.religion,
@@ -405,7 +438,7 @@ export async function updateProfile(userId: string, input: ProfileUpdateInput) {
     state: input.state,
     education: input.education,
     occupation: input.occupation,
-    annualIncome: input.income,
+    annualIncome,
     about: input.about,
     hobbies: input.hobbies,
     selectedInterests: input.selectedInterests,
@@ -429,13 +462,13 @@ export async function updateProfile(userId: string, input: ProfileUpdateInput) {
             community: optionalString(input.community),
             gender: genderToDb(input.gender),
             dateOfBirth,
-            maritalStatus: input.maritalStatus,
+            maritalStatus,
             heightCm,
             heightLabel: input.height,
             weightKg: optionalInt(input.weight),
-            bodyType: optionalString(input.bodyType),
-            complexion: optionalString(input.complexion),
-            physicalStatus: optionalString(input.physicalStatus),
+            bodyType: optionalString(bodyType),
+            complexion: optionalString(complexion),
+            physicalStatus: optionalString(physicalStatus),
             religion: optionalString(input.religion),
             caste: optionalString(input.caste),
             subCaste: optionalString(input.subCaste),
@@ -445,29 +478,29 @@ export async function updateProfile(userId: string, input: ProfileUpdateInput) {
             country: optionalString(input.country) ?? "India",
             state: input.state,
             city: input.city,
-            residencyStatus: optionalString(input.residencyStatus),
+            residencyStatus: optionalString(residencyStatus),
             education: input.education,
-            employedIn: optionalString(input.employedIn),
+            employedIn: optionalString(employedIn),
             occupation: input.occupation,
-            annualIncome: optionalString(input.income),
-            familyStatus: optionalString(input.familyStatus),
-            familyType: optionalString(input.familyType),
+            annualIncome: optionalString(annualIncome),
+            familyStatus: optionalString(familyStatus),
+            familyType: optionalString(familyType),
             fatherOccupation: optionalString(input.fatherOccupation),
             motherOccupation: optionalString(input.motherOccupation),
             brothers: optionalInt(input.brothers),
             sisters: optionalInt(input.sisters),
-            diet: optionalString(input.diet),
-            drinking: optionalString(input.drinking),
-            smoking: optionalString(input.smoking),
+            diet: optionalString(diet),
+            drinking: optionalString(drinking),
+            smoking: optionalString(smoking),
             hobbies: optionalString(input.hobbies),
             about: input.about,
             partnerAgeFrom: optionalInt(input.partnerAgeFrom),
             partnerAgeTo: optionalInt(input.partnerAgeTo),
             partnerHeightCm,
-            partnerMaritalStatus: optionalString(input.partnerMaritalStatus),
+            partnerMaritalStatus: optionalString(partnerMaritalStatus),
             partnerEducation: optionalString(input.partnerEducation),
             partnerOccupation: optionalString(input.partnerOccupation),
-            partnerIncome: optionalString(input.partnerIncome),
+            partnerIncome: optionalString(partnerIncome),
             partnerLocation: optionalString(input.partnerLocation),
             partnerExpectations: input.partnerExpectations,
             profilePhotoUrl: input.profilePhotoUrl || null,
@@ -539,9 +572,12 @@ export async function sendInterest(userId: string, input: SendInterestInput) {
     education: viewer.profile?.education,
     occupation: viewer.profile?.occupation,
     annualIncome: viewer.profile?.annualIncome,
+    familyStatus: viewer.profile?.familyStatus,
+    familyType: viewer.profile?.familyType,
     about: viewer.profile?.about,
     hobbies: viewer.profile?.hobbies,
     selectedInterests: viewer.profile?.interests.map(({ interest }) => interest.label) ?? [],
+    partnerLocation: viewer.profile?.partnerLocation,
     partnerExpectations: viewer.profile?.partnerExpectations,
     email: viewer.email,
     phone: viewer.phone,
@@ -610,6 +646,7 @@ export async function handleInterestAction(userId: string, input: InterestAction
     throw new AppError("Interest request not found.", 404);
   }
 
+  // ── Withdraw: sender removes their own pending request ────────────────────
   if (input.action === "withdraw") {
     if (request.fromUserId !== userId) {
       throw new AppError("You can only withdraw interest requests you sent.", 403);
@@ -620,16 +657,15 @@ export async function handleInterestAction(userId: string, input: InterestAction
     }
 
     await db.interestRequest.delete({
-      where: {
-        id: input.interestId,
-      },
+      where: { id: input.interestId },
     });
 
     return null;
   }
 
+  // ── Accept / Decline: recipient responds to an incoming pending request ───
   if (request.toUserId !== userId) {
-    throw new AppError("You can only update interest requests sent to you.", 403);
+    throw new AppError("You can only respond to interest requests sent to you.", 403);
   }
 
   if (request.status === InterestRequestStatus.CONTACT_SHARED) {
@@ -637,7 +673,7 @@ export async function handleInterestAction(userId: string, input: InterestAction
   }
 
   if (request.status !== InterestRequestStatus.PENDING) {
-    throw new AppError("Only pending interest requests can be updated.", 400);
+    throw new AppError("Only pending interest requests can be accepted or declined.", 400);
   }
 
   const nextStatus =
@@ -646,12 +682,8 @@ export async function handleInterestAction(userId: string, input: InterestAction
       : InterestRequestStatus.DECLINED;
 
   return db.interestRequest.update({
-    where: {
-      id: input.interestId,
-    },
-    data: {
-      status: nextStatus,
-    },
+    where: { id: input.interestId },
+    data: { status: nextStatus },
     include: interestRequestInclude,
   });
 }

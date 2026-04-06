@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { apiError, requireApiViewer } from "@/server/api";
 import { updateReportStatus } from "@/server/services/admin";
 import { buildReportItem } from "@/server/services/mappers";
-import { db } from "@/server/db";
-import { reportInclude } from "@/server/services/mappers";
 import { adminReportUpdateSchema } from "@/server/validation";
 
 export async function PATCH(
@@ -17,13 +15,10 @@ export async function PATCH(
       ...(await request.json()),
       reportId,
     });
-    await updateReportStatus(payload);
-    const report = await db.userReport.findUniqueOrThrow({
-      where: {
-        id: reportId,
-      },
-      include: reportInclude,
-    });
+
+    // updateReportStatus now returns the full report with related users
+    // included, so no separate re-fetch is needed.
+    const report = await updateReportStatus(payload);
 
     return NextResponse.json({
       report: buildReportItem(report),

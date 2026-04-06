@@ -8,6 +8,19 @@ import {
   displayGender,
   formatHeight,
 } from "@/lib/profile-utils";
+import {
+  normalizeAnnualIncome,
+  normalizeBodyType,
+  normalizeComplexion,
+  normalizeDiet,
+  normalizeEmployedIn,
+  normalizeFamilyStatus,
+  normalizeFamilyType,
+  normalizeHabitFrequency,
+  normalizeMaritalStatus,
+  normalizePhysicalStatus,
+  normalizeResidencyStatus,
+} from "@/lib/constants/profile-options";
 import type {
   AdminInterestItem,
   AdminUserItem,
@@ -69,6 +82,14 @@ function ensureProfile(user: UserWithProfile) {
   return user.profile;
 }
 
+function normalizeOrFallback(
+  value: string | null | undefined,
+  normalizer: (value: string | null | undefined) => string | null,
+  fallback = "Not specified",
+) {
+  return normalizer(value) ?? value ?? fallback;
+}
+
 export function buildSessionViewer(user: UserWithProfile): SessionViewer {
   const completion = buildProfileCompletionState({
     fullName: user.fullName,
@@ -85,9 +106,12 @@ export function buildSessionViewer(user: UserWithProfile): SessionViewer {
     education: user.profile?.education,
     occupation: user.profile?.occupation,
     annualIncome: user.profile?.annualIncome,
+    familyStatus: user.profile?.familyStatus,
+    familyType: user.profile?.familyType,
     about: user.profile?.about,
     hobbies: user.profile?.hobbies,
     selectedInterests: getInterestLabels(user),
+    partnerLocation: user.profile?.partnerLocation,
     partnerExpectations: user.profile?.partnerExpectations,
     email: user.email,
     phone: user.phone,
@@ -124,15 +148,15 @@ export function buildProfileCard(user: UserWithProfile): ProfileCard {
     state: profile.state ?? "Not specified",
     occupation: profile.occupation ?? "Not specified",
     education: profile.education ?? "Not specified",
-    annualIncome: profile.annualIncome ?? "Not specified",
+    annualIncome: normalizeOrFallback(profile.annualIncome, normalizeAnnualIncome),
     height: formatHeight(profile.heightCm, profile.heightLabel),
     caste: profile.caste ?? "Not specified",
-    maritalStatus: profile.maritalStatus ?? "Not specified",
+    maritalStatus: normalizeOrFallback(profile.maritalStatus, normalizeMaritalStatus),
     religion: profile.religion ?? "Not specified",
     star: profile.star ?? "Not specified",
-    diet: profile.diet ?? "Not specified",
-    smoking: profile.smoking ?? "Not specified",
-    drinking: profile.drinking ?? "Not specified",
+    diet: normalizeOrFallback(profile.diet, normalizeDiet),
+    smoking: normalizeOrFallback(profile.smoking, normalizeHabitFrequency),
+    drinking: normalizeOrFallback(profile.drinking, normalizeHabitFrequency),
     about: profile.about ?? "No profile introduction has been added yet.",
     interests: getInterestLabels(user),
     profilePhotoUrl: profile.profilePhotoUrl ?? null,
@@ -157,26 +181,29 @@ export function buildProfileDetail(
     gothram: profile.gothram ?? "Not specified",
     raasi: profile.raasi ?? "Not specified",
     country: profile.country ?? "India",
-    residencyStatus: profile.residencyStatus ?? "Not specified",
-    employedIn: profile.employedIn ?? "Not specified",
-    familyStatus: profile.familyStatus ?? "Not specified",
-    familyType: profile.familyType ?? "Not specified",
+    residencyStatus: normalizeOrFallback(profile.residencyStatus, normalizeResidencyStatus),
+    employedIn: normalizeOrFallback(profile.employedIn, normalizeEmployedIn),
+    familyStatus: normalizeOrFallback(profile.familyStatus, normalizeFamilyStatus),
+    familyType: normalizeOrFallback(profile.familyType, normalizeFamilyType),
     fatherOccupation: profile.fatherOccupation ?? "Not specified",
     motherOccupation: profile.motherOccupation ?? "Not specified",
     brothers: profile.brothers,
     sisters: profile.sisters,
     weightKg: profile.weightKg,
-    bodyType: profile.bodyType ?? "Not specified",
-    complexion: profile.complexion ?? "Not specified",
-    physicalStatus: profile.physicalStatus ?? "Not specified",
+    bodyType: normalizeOrFallback(profile.bodyType, normalizeBodyType),
+    complexion: normalizeOrFallback(profile.complexion, normalizeComplexion),
+    physicalStatus: normalizeOrFallback(profile.physicalStatus, normalizePhysicalStatus),
     hobbies: profile.hobbies ?? "Not specified",
     partnerAgeFrom: profile.partnerAgeFrom,
     partnerAgeTo: profile.partnerAgeTo,
     partnerHeight: formatHeight(profile.partnerHeightCm),
-    partnerMaritalStatus: profile.partnerMaritalStatus ?? "Not specified",
+    partnerMaritalStatus: normalizeOrFallback(
+      profile.partnerMaritalStatus,
+      normalizeMaritalStatus,
+    ),
     partnerEducation: profile.partnerEducation ?? "Not specified",
     partnerOccupation: profile.partnerOccupation ?? "Not specified",
-    partnerIncome: profile.partnerIncome ?? "Not specified",
+    partnerIncome: normalizeOrFallback(profile.partnerIncome, normalizeAnnualIncome),
     partnerLocation: profile.partnerLocation ?? "Not specified",
     partnerExpectations:
       profile.partnerExpectations ?? "No partner preferences have been added yet.",

@@ -1,6 +1,6 @@
 import { InterestRequestStatus, UserRole } from "@prisma/client";
 import type { z } from "zod";
-import { normalizePhone } from "@/lib/profile-utils";
+import { buildProfileCompletion, normalizePhone } from "@/lib/profile-utils";
 import type { AdminDashboardData } from "@/types/domain";
 import { db } from "@/server/db";
 import { AppError } from "@/server/errors";
@@ -100,9 +100,7 @@ export async function getAdminDashboardData(userId: string): Promise<AdminDashbo
 
 export async function updateUserByAdmin(userId: string, input: AdminUserUpdateInput) {
   const existingUser = await db.user.findUnique({
-    where: {
-      id: userId,
-    },
+    where: { id: userId },
     include: userWithProfileInclude,
   });
 
@@ -116,9 +114,7 @@ export async function updateUserByAdmin(userId: string, input: AdminUserUpdateIn
 
   if (input.email && input.email !== existingUser.email) {
     const emailOwner = await db.user.findUnique({
-      where: {
-        email: input.email,
-      },
+      where: { email: input.email },
     });
 
     if (emailOwner && emailOwner.id !== userId) {
@@ -126,10 +122,8 @@ export async function updateUserByAdmin(userId: string, input: AdminUserUpdateIn
     }
   }
 
-  return db.user.update({
-    where: {
-      id: userId,
-    },
+  const updatedUser = await db.user.update({
+    where: { id: userId },
     data: {
       fullName: input.fullName,
       email: input.email,
@@ -145,6 +139,51 @@ export async function updateUserByAdmin(userId: string, input: AdminUserUpdateIn
     },
     include: userWithProfileInclude,
   });
+
+  // Recalculate isProfileComplete whenever admin changes fields that affect
+  // completion (city, occupation, email, phone, fullName). Using the returned
+  // user ensures we reflect the merged state of all profile fields.
+  const profile = updatedUser.profile!;
+  const isProfileComplete = buildProfileCompletion({
+    fullName: updatedUser.fullName,
+    gender: profile.gender,
+    dateOfBirth: profile.dateOfBirth,
+    height: profile.heightLabel ?? profile.heightCm,
+    maritalStatus: profile.maritalStatus,
+    profilePhotoUrl: profile.profilePhotoUrl,
+    community: profile.community,
+    religion: profile.religion,
+    caste: profile.caste,
+    city: profile.city,
+    state: profile.state,
+    education: profile.education,
+    occupation: profile.occupation,
+    annualIncome: profile.annualIncome,
+    familyStatus: profile.familyStatus,
+    familyType: profile.familyType,
+    about: profile.about,
+    hobbies: profile.hobbies,
+    selectedInterests: profile.interests.map(({ interest }) => interest.label),
+    partnerLocation: profile.partnerLocation,
+    partnerExpectations: profile.partnerExpectations,
+    email: updatedUser.email,
+    phone: updatedUser.phone,
+    horoscopeImageUrl: profile.horoscopeImageUrl,
+  });
+
+  if (profile.isProfileComplete !== isProfileComplete) {
+    await db.profile.update({
+      where: { id: profile.id },
+      data: { isProfileComplete },
+    });
+    // Return fresh user with the updated completion flag.
+    return db.user.findUniqueOrThrow({
+      where: { id: userId },
+      include: userWithProfileInclude,
+    });
+  }
+
+  return updatedUser;
 }
 
 export async function deleteUserByAdmin(userId: string) {
@@ -200,23 +239,36 @@ export async function shareContactByAdmin(interestId: string) {
 }
 
 export async function updateTicketStatus(input: AdminTicketUpdateInput) {
+  const ticket = await db.supportTicket.findUnique({
+    where: { id: input.ticketId },
+    select: { id: true },
+  });
+
+  if (!ticket) {
+    throw new AppError("Support ticket not found.", 404);
+  }
+
   return db.supportTicket.update({
-    where: {
-      id: input.ticketId,
-    },
-    data: {
-      status: input.status,
-    },
+    where: { id: input.ticketId },
+    data: { status: input.status },
   });
 }
 
 export async function updateReportStatus(input: AdminReportUpdateInput) {
+  const report = await db.userReport.findUnique({
+    where: { id: input.reportId },
+    select: { id: true },
+  });
+
+  if (!report) {
+    throw new AppError("Report not found.", 404);
+  }
+
+  // Return the updated report with its related users so callers
+  // don't need a separate fetch to build the response DTO.
   return db.userReport.update({
-    where: {
-      id: input.reportId,
-    },
-    data: {
-      status: input.status,
-    },
+    where: { id: input.reportId },
+    data: { status: input.status },
+    include: reportInclude,
   });
 }

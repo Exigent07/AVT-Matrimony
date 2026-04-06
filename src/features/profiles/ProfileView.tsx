@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Briefcase,
   GraduationCap,
@@ -15,9 +15,11 @@ import {
 import { toast } from "sonner";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { AnimatedHeartIcon } from "@/components/shared/AnimatedHeartIcon";
+import { MemberResumeTracker } from "@/components/shared/MemberResumeTracker";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { requestJson } from "@/lib/client-request";
+import type { MemberResumeEntry } from "@/lib/member-resume";
 import { useLanguage } from "@/providers/LanguageProvider";
 import {
   translateDisplayValue,
@@ -85,6 +87,29 @@ export function ProfileView({
       : language === "ta" ? "ஆர்வம் தற்போது இல்லை" : "Interest unavailable";
   const [heartBurstKey, setHeartBurstKey] = useState<number | null>(null);
   const [isSubmittingInterest, setIsSubmittingInterest] = useState(false);
+  const resumeEntry = useMemo<MemberResumeEntry | null>(() => {
+    if (!isMemberViewer) {
+      return null;
+    }
+
+    return {
+      href: isOwnProfile ? "/profile/me" : `/profile/${profile.userId}`,
+      icon: "user",
+      title: {
+        en: isOwnProfile ? "Your profile" : "Profile view",
+        ta: isOwnProfile ? "உங்கள் சுயவிவரம்" : "சுயவிவர பார்வை",
+      },
+      detail: {
+        en: isOwnProfile
+          ? "Reviewing your own profile"
+          : `Viewing ${profile.fullName}`,
+        ta: isOwnProfile
+          ? "உங்கள் சுயவிவரத்தை பார்க்கிறீர்கள்"
+          : `${profile.fullName} சுயவிவரத்தை பார்க்கிறீர்கள்`,
+      },
+      updatedAt: new Date().toISOString(),
+    };
+  }, [isMemberViewer, isOwnProfile, profile.fullName, profile.userId]);
 
   async function handleShowInterest() {
     setHeartBurstKey(Date.now());
@@ -103,13 +128,14 @@ export function ProfileView({
   return (
     <PageTransition>
       <div className="page-shell">
+        {resumeEntry ? <MemberResumeTracker viewerId={viewer.id} entry={resumeEntry} /> : null}
         <AppHeader mode={headerMode} activeLink={activeHeaderLink} viewer={viewer} />
 
         <div className="section-shell-narrow section-block pt-4 md:pt-6">
           <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="space-y-5">
               <div className="panel-surface overflow-hidden">
-                <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-[#FBF7F0] to-[#F5EFE0]">
+                <div className="relative flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-[#FBF7F0] to-[#F0E8D8] lg:aspect-square">
                   {profile.profilePhotoUrl ? (
                     <Image
                       src={profile.profilePhotoUrl}
@@ -119,8 +145,13 @@ export function ProfileView({
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white text-[#B91C1C] shadow-sm">
-                      <UserRound className="h-12 w-12" />
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="flex h-28 w-28 items-center justify-center rounded-[1.5rem] bg-white/80 text-[#B91C1C] shadow-[0_16px_32px_rgba(15,23,42,0.1)] ring-1 ring-[#B91C1C]/10">
+                        <UserRound className="h-14 w-14" />
+                      </div>
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                        {profile.fullName.split(" ")[0]}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -186,8 +217,10 @@ export function ProfileView({
 
               <div className="panel-surface p-5">
                 <div className="flex items-center gap-2.5">
-                  <ShieldCheck className="h-4 w-4 text-[#B91C1C]" />
-                  <h2 className="text-xl text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#B91C1C]/[0.07] text-[#B91C1C]">
+                    <ShieldCheck className="h-4 w-4" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-slate-900">
                     {language === "ta" ? "தொடர்பு காட்சியளிப்பு" : "Contact visibility"}
                   </h2>
                 </div>
@@ -196,9 +229,23 @@ export function ProfileView({
                     ? "ஏற்கப்பட்ட ஆர்வக் கோரிக்கை நிர்வாகியால் பரிசீலிக்கப்பட்டு பகிரப்பட்ட பின் மட்டுமே தொடர்பு தகவல் வெளியிடப்படும்."
                     : "Contact information is only released after an accepted interest request has been reviewed and shared by the administrator."}
                 </p>
-                <div className="mt-4 space-y-2.5 text-sm">
-                  <DetailRow icon={Mail} label={language === "ta" ? "மின்னஞ்சல்" : "Email"} value={profile.canViewContact ? profile.email ?? (language === "ta" ? "வழங்கப்படவில்லை" : "Not provided") : language === "ta" ? "தொடர்பு பகிர்வுக்குப் பிறகு தெரியும்" : "Hidden until contact release"} />
-                  <DetailRow icon={Phone} label={language === "ta" ? "தொலைபேசி" : "Phone"} value={profile.canViewContact ? profile.phone ?? (language === "ta" ? "வழங்கப்படவில்லை" : "Not provided") : language === "ta" ? "தொடர்பு பகிர்வுக்குப் பிறகு தெரியும்" : "Hidden until contact release"} />
+                <div className="mt-4 space-y-3">
+                  {profile.canViewContact ? (
+                    <>
+                      <span className="contact-chip">
+                        <Mail className="h-3.5 w-3.5" />
+                        {profile.email ?? (language === "ta" ? "வழங்கப்படவில்லை" : "Not provided")}
+                      </span>
+                      <span className="contact-chip">
+                        <Phone className="h-3.5 w-3.5" />
+                        {profile.phone ?? (language === "ta" ? "வழங்கப்படவில்லை" : "Not provided")}
+                      </span>
+                    </>
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-[#B91C1C]/12 bg-[#B91C1C]/[0.02] px-4 py-3 text-center text-xs font-medium text-slate-400">
+                      {language === "ta" ? "தொடர்பு பகிர்வுக்குப் பிறகு தெரியும்" : "Hidden until contact is released"}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -301,13 +348,13 @@ function DetailRow({ icon: Icon, label, value }: {
   const { language } = useLanguage();
 
   return (
-    <div className="flex items-start gap-2.5">
-      <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[#B91C1C]/[0.06] text-[#B91C1C]">
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[#B91C1C]/[0.07] text-[#B91C1C]">
         <Icon className="h-3.5 w-3.5" />
       </div>
       <div className="min-w-0">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</div>
-        <div className="mt-0.5 text-sm font-medium text-slate-700">
+        <div className="meta-label">{label}</div>
+        <div className="mt-0.5 text-sm font-semibold text-slate-800">
           {translateDisplayValue(value, language)}
         </div>
       </div>
@@ -319,9 +366,9 @@ function MetaCard({ label, value }: { label: string; value: string }) {
   const { language } = useLanguage();
 
   return (
-    <div className="panel-muted p-3.5">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</div>
-      <div className="mt-1 text-sm font-medium text-slate-700">
+    <div className="meta-card">
+      <div className="meta-label">{label}</div>
+      <div className="mt-1.5 text-sm font-semibold text-slate-800">
         {translateDisplayValue(value, language)}
       </div>
     </div>

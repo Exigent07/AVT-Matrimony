@@ -94,7 +94,7 @@ export function Stories({ viewer }: StoriesProps) {
               transition={{ duration: 0.5 }}
             >
               <span className="eyebrow-pill">{language === "ta" ? "உண்மையான இணைப்புகள்" : "Real connections"}</span>
-              <h1 className="mt-5 text-4xl text-slate-900 md:text-5xl lg:text-[4rem]" style={{ fontFamily: "var(--font-display)" }}>
+              <h1 className="mt-5 text-4xl text-slate-900 md:text-5xl lg:text-[4rem]">
                 {t("stories.title")}
               </h1>
               <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-500 md:text-lg">
@@ -102,22 +102,39 @@ export function Stories({ viewer }: StoriesProps) {
               </p>
             </motion.div>
 
-            <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {/* Stories banner image */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mt-8 overflow-hidden rounded-[1.5rem] border border-[#B91C1C]/10 bg-[#f5ece0] shadow-[0_18px_36px_rgba(15,23,42,0.07)]"
+            >
+              <img
+                src="/images/stories-banner.png"
+                alt={language === "ta" ? "தமிழ் திருமண கோலம் அலங்காரம்" : "Traditional Tamil kolam wedding decoration"}
+                className="aspect-[16/5] w-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none';
+                }}
+              />
+            </motion.div>
+
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
                 <div className="stat-surface text-center">
-                  <div className="text-3xl text-[#B91C1C] md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>2,500+</div>
+                  <div className="font-display text-3xl text-[#B91C1C] md:text-4xl">2,500+</div>
                   <div className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">{t("stories.successful.marriages")}</div>
                 </div>
               </div>
               <div>
                 <div className="stat-surface text-center">
-                  <div className="text-3xl text-[#B91C1C] md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>50+</div>
+                  <div className="font-display text-3xl text-[#B91C1C] md:text-4xl">50+</div>
                   <div className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">{t("stories.countries.connected")}</div>
                 </div>
               </div>
               <div>
                 <div className="stat-surface text-center">
-                  <div className="text-3xl text-[#B91C1C] md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>95%</div>
+                  <div className="font-display text-3xl text-[#B91C1C] md:text-4xl">95%</div>
                   <div className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">{t("stories.happy.families")}</div>
                 </div>
               </div>
@@ -152,7 +169,7 @@ export function Stories({ viewer }: StoriesProps) {
                   </div>
                   <p className="text-sm leading-relaxed text-slate-500">{story.story}</p>
                   <div className="mt-5 border-t border-slate-100 pt-4">
-                    <div className="text-lg text-[#B91C1C]" style={{ fontFamily: "var(--font-display)" }}>
+                    <div className="font-display text-lg text-[#B91C1C]">
                       {story.names}
                     </div>
                     <div className="mt-0.5 text-xs text-slate-400">{story.location}</div>
@@ -165,9 +182,9 @@ export function Stories({ viewer }: StoriesProps) {
 
         <section className="section-shell section-block pt-0">
           <div className="panel-surface p-6 md:p-8 lg:p-10">
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
+            <div className="mb-8 md:mb-10">
               <span className="section-label">{language === "ta" ? "நம்பிக்கையின் குரல்கள்" : "Voices of trust"}</span>
-              <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
+              <h2 className="mt-3 text-3xl text-slate-900 md:text-4xl">
                 {t("stories.testimonials.title")}
               </h2>
               <p className="mt-3 text-base text-slate-500">
@@ -177,11 +194,11 @@ export function Stories({ viewer }: StoriesProps) {
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
               {testimonials.map((testimonial, index) => (
-                <div key={index} className="panel-muted p-6 md:p-8">
-                  <div className="text-3xl leading-none text-slate-300">&ldquo;</div>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{testimonial.text}</p>
-                  <div className="mt-5 border-t border-slate-200/60 pt-4">
-                    <div className="text-lg text-[#B91C1C]" style={{ fontFamily: "var(--font-display)" }}>
+                <div key={index} className="panel-muted p-5 md:p-6">
+                  <div className="mb-3.5 h-[1.5px] w-8 rounded-full bg-[#B91C1C]/35" />
+                  <p className="text-sm italic leading-relaxed text-slate-600">{testimonial.text}</p>
+                  <div className="mt-4 border-t border-slate-100/80 pt-4">
+                    <div className="font-display text-base text-[#B91C1C]">
                       {testimonial.name}
                     </div>
                     <div className="mt-0.5 text-xs text-slate-400">{testimonial.relation}</div>
@@ -194,7 +211,7 @@ export function Stories({ viewer }: StoriesProps) {
 
         <section className="section-shell section-block pt-0">
           <div className="hero-surface px-6 py-10 text-center md:px-10 md:py-12">
-            <h2 className="text-3xl text-slate-900 md:text-4xl" style={{ fontFamily: "var(--font-display)" }}>
+            <h2 className="text-3xl text-slate-900 md:text-4xl">
               {t("stories.cta.title")}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base text-slate-500 md:text-lg">

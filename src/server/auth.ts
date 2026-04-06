@@ -60,6 +60,30 @@ export async function destroySession() {
   cookieStore.delete(SESSION_COOKIE_NAME);
 }
 
+// Lazily purge expired sessions for all users at most once every 6 hours per
+// process. This prevents indefinite accumulation of stale session rows in the
+// database without needing a separate cron job.
+const SESSION_CLEANUP_INTERVAL_MS = 6 * 60 * 60 * 1000;
+let lastSessionCleanupAt = 0;
+
+async function purgeExpiredSessionsIfDue() {
+  const now = Date.now();
+
+  if (now - lastSessionCleanupAt < SESSION_CLEANUP_INTERVAL_MS) {
+    return;
+  }
+
+  lastSessionCleanupAt = now;
+
+  // Fire-and-forget — we do not await so the cleanup never delays the request.
+  db.session
+    .deleteMany({ where: { expiresAt: { lt: new Date() } } })
+    .catch(() => {
+      // Reset the timestamp so the next request retries the cleanup.
+      lastSessionCleanupAt = 0;
+    });
+}
+
 export const getCurrentViewer = cache(async (): Promise<SessionViewer | null> => {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
@@ -96,22 +120,19 @@ export const getCurrentViewer = cache(async (): Promise<SessionViewer | null> =>
 
   if (session.expiresAt <= new Date() || session.user.accountStatus === AccountStatus.BLOCKED) {
     await db.session.delete({
-      where: {
-        id: session.id,
-      },
+      where: { id: session.id },
     });
     cookieStore.delete(SESSION_COOKIE_NAME);
     return null;
   }
 
+  // Update lastSeenAt and kick off background cleanup of expired sessions.
   await db.session.update({
-    where: {
-      id: session.id,
-    },
-    data: {
-      lastSeenAt: new Date(),
-    },
+    where: { id: session.id },
+    data: { lastSeenAt: new Date() },
   });
+
+  void purgeExpiredSessionsIfDue();
 
   return buildSessionViewer(session.user);
 });

@@ -192,6 +192,7 @@ function Calendar({
 
 function CalendarMonthCaption({
   calendarMonth,
+  displayIndex: _displayIndex,
   className,
   ...props
 }: MonthCaptionProps) {

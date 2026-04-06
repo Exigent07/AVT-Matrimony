@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Eye, EyeOff } from "lucide-react";
 import { enUS, ta } from "react-day-picker/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,7 @@ interface SelectControlProps
   children: ReactNode;
   onChange?: (event: SelectControlChangeEvent) => void;
   size?: "default" | "sm";
+  containerClassName?: string;
 }
 
 interface DateControlProps
@@ -118,6 +119,35 @@ export function InputControl({ className, ...props }: InputControlProps) {
   return <Input className={cn("field-input", className)} {...props} />;
 }
 
+export function PasswordControl({
+  className,
+  ...props
+}: Omit<InputControlProps, "type">) {
+  const [visible, setVisible] = React.useState(false);
+  return (
+    <div className="relative">
+      <Input
+        type={visible ? "text" : "password"}
+        className={cn("field-input pr-10", className)}
+        {...props}
+      />
+      <button
+        type="button"
+        tabIndex={-1}
+        onClick={() => setVisible((v) => !v)}
+        aria-label={visible ? "Hide password" : "Show password"}
+        className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 transition-colors hover:text-slate-700"
+      >
+        {visible ? (
+          <EyeOff className="h-4 w-4" />
+        ) : (
+          <Eye className="h-4 w-4" />
+        )}
+      </button>
+    </div>
+  );
+}
+
 export function TextareaControl({
   className,
   ...props
@@ -133,14 +163,19 @@ export function SelectControl({
   required,
   disabled,
   size = "default",
+  containerClassName,
   className,
   ...props
 }: SelectControlProps) {
   const { options, placeholder } = extractSelectOptions(children);
   const normalizedValue = normalizeFieldValue(value);
+  const triggerSizingClass =
+    size === "sm"
+      ? "w-full h-auto min-h-10"
+      : "w-full h-auto min-h-12";
 
   return (
-    <div className="field-shell">
+    <div className={cn("field-shell w-full", containerClassName)}>
       {name ? <input type="hidden" name={name} value={normalizedValue} /> : null}
       <Select
         value={normalizedValue || undefined}
@@ -151,7 +186,11 @@ export function SelectControl({
         <SelectTrigger
           size={size}
           aria-invalid={props["aria-invalid"]}
-          className={cn("field-input field-select-trigger", className)}
+          className={cn(
+            "field-input field-select-trigger",
+            triggerSizingClass,
+            className,
+          )}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
@@ -206,7 +245,7 @@ export function DateControl({
         (language === "ta" ? "தேதியைத் தேர்ந்தெடுக்கவும்" : "Select date");
 
   return (
-    <div className="field-shell">
+    <div className="field-shell w-full">
       {name ? <input type="hidden" name={name} value={normalizedValue} /> : null}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>

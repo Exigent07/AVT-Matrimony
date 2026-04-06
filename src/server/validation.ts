@@ -1,5 +1,19 @@
 import { z } from "zod";
 import { INTEREST_LABELS } from "@/lib/constants/interests";
+import {
+  ANNUAL_INCOME_OPTIONS,
+  BODY_TYPE_OPTIONS,
+  COMPLEXION_OPTIONS,
+  DIET_OPTIONS,
+  EMPLOYED_IN_OPTIONS,
+  FAMILY_STATUS_OPTIONS,
+  FAMILY_TYPE_OPTIONS,
+  HABIT_FREQUENCY_OPTIONS,
+  MARITAL_STATUS_OPTIONS,
+  PHYSICAL_STATUS_OPTIONS,
+  RESIDENCY_STATUS_OPTIONS,
+  isProfileOption,
+} from "@/lib/constants/profile-options";
 import { isAdult, normalizePhone } from "@/lib/profile-utils";
 
 const emailSchema = z.email().trim().toLowerCase();
@@ -25,6 +39,13 @@ const optionalBoundedText = z
   .max(80, "Keep this under 80 characters.")
   .optional()
   .transform((value) => value || "");
+
+function hasFullNameParts(value: string) {
+  return value
+    .trim()
+    .split(/\s+/)
+    .filter((part) => /[\p{L}]/u.test(part)).length >= 2;
+}
 
 function humanTextSchema(
   requiredMessage: string,
@@ -56,7 +77,7 @@ function humanTextSchema(
 const nameSchema = humanTextSchema("Enter your full name.", {
   max: 80,
   invalidMessage: "Use letters, spaces, and common punctuation for your name.",
-});
+}).refine((value) => hasFullNameParts(value), "Enter your first and last name.");
 
 const educationSchema = humanTextSchema("Enter your education.", {
   allowNumbers: true,
@@ -66,11 +87,50 @@ const occupationSchema = humanTextSchema("Enter your occupation.", {
   allowNumbers: true,
 });
 
+function requiredOptionSchema<T extends readonly string[]>(
+  options: T,
+  requiredMessage: string,
+) {
+  return z
+    .string()
+    .trim()
+    .min(1, requiredMessage)
+    .refine((value) => isProfileOption(value, options), requiredMessage);
+}
+
+function optionalOptionSchema<T extends readonly string[]>(
+  options: T,
+  invalidMessage: string,
+) {
+  return z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => value || "")
+    .refine((value) => !value || isProfileOption(value, options), invalidMessage);
+}
+
+const incomeSchema = optionalOptionSchema(
+  ANNUAL_INCOME_OPTIONS,
+  "Select a valid annual income range.",
+);
+
 const citySchema = humanTextSchema("Enter your city.");
 const stateSchema = humanTextSchema("Enter your state.");
 const casteSchema = humanTextSchema("Enter your caste.");
+const communitySchema = humanTextSchema("Enter your community.");
+const religionSchema = humanTextSchema("Enter your religion.");
+const familyStatusSchema = humanTextSchema("Enter your family status.", {
+  allowNumbers: true,
+});
+const familyTypeSchema = humanTextSchema("Enter your family type.", {
+  allowNumbers: true,
+});
+const partnerLocationSchema = humanTextSchema("Enter your preferred location.", {
+  allowNumbers: true,
+});
 
-const interestSchema = z.array(z.string().trim()).max(15).refine(
+const interestSchema = z.array(z.string().trim()).min(3, "Select at least 3 interests.").max(15).refine(
   (interests) => interests.every((interest) => INTEREST_LABELS.has(interest)),
   "One or more selected interests are invalid.",
 );
@@ -94,10 +154,13 @@ export const registerSchema = z
     password: passwordSchema,
     confirmPassword: z.string(),
     height: z.string().trim().min(1, "Select your height."),
-    maritalStatus: z.string().trim().min(1, "Select your marital status."),
+    maritalStatus: requiredOptionSchema(
+      MARITAL_STATUS_OPTIONS,
+      "Select your marital status.",
+    ),
     education: educationSchema,
     occupation: occupationSchema,
-    income: optionalBoundedText,
+    income: incomeSchema,
     city: citySchema,
     state: stateSchema,
     caste: casteSchema,
@@ -125,14 +188,20 @@ export const profileUpdateSchema = z
     fullName: nameSchema,
     gender: z.enum(["male", "female"]),
     dateOfBirth: z.string().date(),
-    community: optionalBoundedText,
-    maritalStatus: z.string().trim().min(1, "Select your marital status."),
+    community: communitySchema,
+    maritalStatus: requiredOptionSchema(
+      MARITAL_STATUS_OPTIONS,
+      "Select your marital status.",
+    ),
     height: z.string().trim().min(1, "Select your height."),
     weight: optionalText,
-    bodyType: optionalText,
-    complexion: optionalText,
-    physicalStatus: optionalText,
-    religion: optionalBoundedText,
+    bodyType: optionalOptionSchema(BODY_TYPE_OPTIONS, "Select a valid body type."),
+    complexion: optionalOptionSchema(COMPLEXION_OPTIONS, "Select a valid complexion."),
+    physicalStatus: optionalOptionSchema(
+      PHYSICAL_STATUS_OPTIONS,
+      "Select a valid physical status.",
+    ),
+    religion: religionSchema,
     caste: casteSchema,
     subCaste: optionalText,
     gothram: optionalText,
@@ -141,20 +210,41 @@ export const profileUpdateSchema = z
     country: optionalText,
     state: stateSchema,
     city: citySchema,
-    residencyStatus: optionalText,
+    residencyStatus: optionalOptionSchema(
+      RESIDENCY_STATUS_OPTIONS,
+      "Select a valid residency status.",
+    ),
     education: educationSchema,
-    employedIn: optionalText,
+    employedIn: optionalOptionSchema(
+      EMPLOYED_IN_OPTIONS,
+      "Select a valid employment sector.",
+    ),
     occupation: occupationSchema,
-    income: optionalBoundedText,
-    familyStatus: optionalText,
-    familyType: optionalText,
+    income: requiredOptionSchema(
+      ANNUAL_INCOME_OPTIONS,
+      "Select your annual income.",
+    ),
+    familyStatus: requiredOptionSchema(
+      FAMILY_STATUS_OPTIONS,
+      "Select your family status.",
+    ),
+    familyType: requiredOptionSchema(
+      FAMILY_TYPE_OPTIONS,
+      "Select your family type.",
+    ),
     fatherOccupation: optionalText,
     motherOccupation: optionalText,
     brothers: optionalText,
     sisters: optionalText,
-    diet: optionalText,
-    drinking: optionalText,
-    smoking: optionalText,
+    diet: optionalOptionSchema(DIET_OPTIONS, "Select a valid diet preference."),
+    drinking: optionalOptionSchema(
+      HABIT_FREQUENCY_OPTIONS,
+      "Select a valid drinking preference.",
+    ),
+    smoking: optionalOptionSchema(
+      HABIT_FREQUENCY_OPTIONS,
+      "Select a valid smoking preference.",
+    ),
     hobbies: optionalText,
     about: z
       .string()
@@ -164,11 +254,17 @@ export const profileUpdateSchema = z
     partnerAgeFrom: optionalText,
     partnerAgeTo: optionalText,
     partnerHeight: optionalText,
-    partnerMaritalStatus: optionalText,
+    partnerMaritalStatus: optionalOptionSchema(
+      MARITAL_STATUS_OPTIONS,
+      "Select a valid preferred marital status.",
+    ),
     partnerEducation: optionalText,
     partnerOccupation: optionalText,
-    partnerIncome: optionalText,
-    partnerLocation: optionalText,
+    partnerIncome: optionalOptionSchema(
+      ANNUAL_INCOME_OPTIONS,
+      "Select a valid preferred income range.",
+    ),
+    partnerLocation: partnerLocationSchema,
     partnerExpectations: z
       .string()
       .trim()
@@ -223,7 +319,11 @@ export const sendInterestSchema = z.object({
 
 export const interestActionSchema = z.object({
   interestId: z.string().trim().min(1),
-  action: z.enum(["accept", "decline", "withdraw", "share-contact"]),
+  // "share-contact" is intentionally excluded: that action is admin-only and
+  // handled by PATCH /api/admin/interests/[interestId] via shareContactByAdmin.
+  // Including it here would allow any member to accidentally decline a request
+  // (the fallback in handleInterestAction resolves unknown actions → DECLINED).
+  action: z.enum(["accept", "decline", "withdraw"]),
 });
 
 export const supportTicketSchema = z.object({

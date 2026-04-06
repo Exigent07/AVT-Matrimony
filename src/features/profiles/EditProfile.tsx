@@ -1,9 +1,10 @@
 "use client";
 
 import type { ChangeEvent, FormEvent, ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  ChevronDown,
   CheckCircle2,
   ImagePlus,
   ListChecks,
@@ -21,14 +22,28 @@ import {
   TextareaControl,
 } from "@/components/shared/FormControls";
 import { InterestsSelector } from "@/components/shared/InterestsSelector";
+import { MemberResumeTracker } from "@/components/shared/MemberResumeTracker";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import type { MemberResumeEntry } from "@/lib/member-resume";
 import { requestJson } from "@/lib/client-request";
+import {
+  ANNUAL_INCOME_OPTIONS,
+  DIET_OPTIONS,
+  EMPLOYED_IN_OPTIONS,
+  FAMILY_STATUS_OPTIONS,
+  FAMILY_TYPE_OPTIONS,
+  HABIT_FREQUENCY_OPTIONS,
+  MARITAL_STATUS_OPTIONS,
+  RESIDENCY_STATUS_OPTIONS,
+} from "@/lib/constants/profile-options";
 import { getProfileCompletionChecklist } from "@/lib/profile-completion";
 import {
   buildProfileCompletionState,
   isProfilePlaceholderValue,
+  type ProfileCompletionSectionKey,
 } from "@/lib/profile-utils";
+import { translateDisplayValue } from "@/lib/translate-display";
 import { useLanguage } from "@/providers/LanguageProvider";
 import type { ProfileDetail, SessionViewer } from "@/types/domain";
 
@@ -51,6 +66,18 @@ function cleanDisplayValue(value: string | null | undefined) {
   return isProfilePlaceholderValue(value) ? "" : value ?? "";
 }
 
+function normalizePhoneInput(value: string) {
+  return value.replace(/\D/g, "").slice(0, 10);
+}
+
+function buildFieldPlaceholder(label: string, language: "en" | "ta") {
+  return language === "ta" ? `${label} உள்ளிடவும்` : `Enter ${label.charAt(0).toLowerCase()}${label.slice(1)}`;
+}
+
+function buildDatePlaceholder(label: string, language: "en" | "ta") {
+  return language === "ta" ? `${label} தேர்ந்தெடுக்கவும்` : `Select ${label.charAt(0).toLowerCase()}${label.slice(1)}`;
+}
+
 function getProfileTone(status: SessionViewer["profileStatus"]) {
   if (status === "APPROVED") {
     return "success";
@@ -67,6 +94,8 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
   const router = useRouter();
   const { language } = useLanguage();
   const [isSaving, setIsSaving] = useState(false);
+  const [openSidebarPanel, setOpenSidebarPanel] = useState<"jump" | "completion">("jump");
+  const [activeSectionId, setActiveSectionId] = useState("personal");
   const [selectedInterests, setSelectedInterests] = useState<string[]>(profile.interests);
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(profile.profilePhotoUrl);
   const [horoscopeImageUrl, setHoroscopeImageUrl] = useState<string | null>(
@@ -139,9 +168,12 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
         education: formData.education,
         occupation: formData.occupation,
         annualIncome: formData.income,
+        familyStatus: formData.familyStatus,
+        familyType: formData.familyType,
         about: formData.about,
         hobbies: formData.hobbies,
         selectedInterests,
+        partnerLocation: formData.partnerLocation,
         partnerExpectations: formData.partnerExpectations,
         email: formData.email,
         phone: formData.phone,
@@ -168,11 +200,107 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
     ],
     [language],
   );
+  const sectionIdByCompletionSection = useMemo<Record<ProfileCompletionSectionKey, string>>(
+    () => ({
+      identity: "personal",
+      background: "community",
+      career: "professional",
+      story: "lifestyle",
+      partner: "partner",
+      interests: "interests",
+      contact: "contact",
+    }),
+    [],
+  );
+  const sectionResumeTitles = useMemo<Record<string, { en: string; ta: string }>>(() => {
+    const english = labelsByLanguage("en");
+    const tamil = labelsByLanguage("ta");
+
+    return {
+      personal: { en: english.personal, ta: tamil.personal },
+      community: { en: english.community, ta: tamil.community },
+      professional: { en: english.professional, ta: tamil.professional },
+      lifestyle: { en: english.lifestyle, ta: tamil.lifestyle },
+      partner: { en: english.partner, ta: tamil.partner },
+      contact: { en: english.contact, ta: tamil.contact },
+      interests: { en: english.interests, ta: tamil.interests },
+    };
+  }, []);
+  const resumeEntry = useMemo<MemberResumeEntry>(() => {
+    const currentSection = sectionResumeTitles[activeSectionId] ?? sectionResumeTitles.personal;
+
+    return {
+      href: `/edit-profile#${activeSectionId}`,
+      icon: "file",
+      title: {
+        en: "Edit profile",
+        ta: "சுயவிவர திருத்தம்",
+      },
+      detail: {
+        en: `Working in ${currentSection.en}`,
+        ta: `${currentSection.ta} பகுதியில் தொடரவும்`,
+      },
+      updatedAt: new Date().toISOString(),
+    };
+  }, [activeSectionId, sectionResumeTitles]);
   const labels = labelsByLanguage(language);
+  const getFieldPlaceholder = (label: string) => buildFieldPlaceholder(label, language);
+  const getDatePlaceholder = (label: string) => buildDatePlaceholder(label, language);
+  const getSelectPlaceholder = (label: string) => buildDatePlaceholder(label, language);
 
   function updateField<K extends keyof typeof formData>(key: K, value: string) {
     setFormData((current) => ({ ...current, [key]: value }));
   }
+
+  function toggleSidebarPanel(target: "jump" | "completion") {
+    setOpenSidebarPanel((current) =>
+      current === target ? (target === "jump" ? "completion" : "jump") : target,
+    );
+  }
+
+  useEffect(() => {
+    setActiveSectionId((current) =>
+      sectionLinks.some((link) => link.id === current) ? current : sectionLinks[0]?.id ?? "personal",
+    );
+  }, [sectionLinks]);
+
+  useEffect(() => {
+    const sections = sectionLinks
+      .map((link) => document.getElementById(link.id))
+      .filter((section): section is HTMLElement => Boolean(section));
+
+    if (sections.length === 0) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((entryA, entryB) => {
+            if (entryB.intersectionRatio !== entryA.intersectionRatio) {
+              return entryB.intersectionRatio - entryA.intersectionRatio;
+            }
+
+            return entryA.boundingClientRect.top - entryB.boundingClientRect.top;
+          });
+
+        const nextActiveSection = visibleEntries[0]?.target.id;
+
+        if (nextActiveSection) {
+          setActiveSectionId(nextActiveSection);
+        }
+      },
+      {
+        rootMargin: "-136px 0px -52% 0px",
+        threshold: [0.15, 0.3, 0.5, 0.75],
+      },
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, [sectionLinks]);
 
   async function readFile(file: File) {
     if (!file.type.startsWith("image/")) {
@@ -217,6 +345,10 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
     setIsSaving(true);
 
     try {
+      if (selectedInterests.length < 3) {
+        throw new Error(labels.interestsRequiredError);
+      }
+
       await requestJson("/api/profile", {
         method: "PUT",
         body: JSON.stringify({
@@ -239,6 +371,7 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
   return (
     <PageTransition>
       <div className="page-shell">
+        <MemberResumeTracker viewerId={viewer.id} entry={resumeEntry} />
         <AppHeader mode="member" activeLink="edit-profile" viewer={viewer} />
 
         <div className="section-shell-narrow section-block pt-4 md:pt-6">
@@ -246,10 +379,7 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
                 <span className="section-label">{labels.sectionLabel}</span>
-                <h1
-                  className="mt-3 text-4xl text-slate-900 md:text-5xl"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
+                <h1 className="mt-3 font-display text-4xl text-slate-900 md:text-5xl">
                   {labels.title}
                 </h1>
                 <p className="mt-2 text-sm leading-relaxed text-slate-500">
@@ -293,10 +423,7 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                   </div>
 
                   <div className="min-w-0">
-                    <div
-                      className="text-2xl text-slate-900"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
+                    <div className="font-display text-2xl text-slate-900">
                       {formData.fullName || labels.previewFallbackName}
                     </div>
                     <p className="mt-1 text-sm text-slate-500">
@@ -324,72 +451,129 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
               </div>
 
               <div className="panel-surface p-5 md:p-6">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-[#B91C1C]" />
-                  <h2
-                    className="text-xl text-slate-900"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    {labels.completionTitle}
-                  </h2>
-                </div>
-                <p className="mt-2 text-sm leading-relaxed text-slate-500">
-                  {labels.completionDescription}
-                </p>
-
-                <div className="mt-5">
-                  <div className="flex items-center justify-between text-[13px] font-medium text-slate-500">
-                    <span>{labels.requiredProgressLabel}</span>
-                    <span>
-                      {completionState.requiredCompletedCount}/{completionState.requiredCount}
-                    </span>
+                <button
+                  type="button"
+                  onClick={() => toggleSidebarPanel("jump")}
+                  aria-expanded={openSidebarPanel === "jump"}
+                  aria-controls="jump-sections-panel"
+                  className="flex w-full items-center justify-between gap-4 text-left"
+                >
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">{labels.jumpToTitle}</div>
+                    <div className="mt-1 text-sm text-slate-500">
+                      {sectionLinks.length} {language === "ta" ? "பிரிவுகள்" : "sections"}
+                    </div>
                   </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                    <div
-                      className="h-full rounded-full bg-[#B91C1C] transition-[width] duration-300"
-                      style={{ width: `${completionState.percentage}%` }}
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#B91C1C]/10 bg-[#B91C1C]/[0.05] text-[#B91C1C]">
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform duration-200 ${
+                        openSidebarPanel === "jump" ? "rotate-180" : ""
+                      }`}
                     />
-                  </div>
-                  <div className="mt-2 text-sm font-semibold text-[#B91C1C]">
-                    {completionState.percentage}% {labels.completeSuffix}
-                  </div>
-                </div>
+                  </span>
+                </button>
 
-                <div className="panel-muted mt-5 p-4">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                    <ListChecks className="h-4 w-4 text-[#B91C1C]" />
-                    <span>{labels.onboardingTitle}</span>
+                {openSidebarPanel === "jump" ? (
+                  <div id="jump-sections-panel" className="mt-4 grid gap-2">
+                    {sectionLinks.map((link) => (
+                      <a
+                        key={link.id}
+                        href={`#${link.id}`}
+                        onClick={() => setActiveSectionId(link.id)}
+                        aria-current={activeSectionId === link.id ? "location" : undefined}
+                        className={`interactive-row block px-4 py-3 text-sm font-semibold ${
+                          activeSectionId === link.id
+                            ? "border-[#B91C1C]/18 bg-[#B91C1C]/[0.07] text-[#991B1B] shadow-[0_12px_24px_rgba(185,28,28,0.08)]"
+                            : "text-slate-600"
+                        }`}
+                      >
+                        {link.title}
+                      </a>
+                    ))}
                   </div>
-                  <div className="mt-3 space-y-2.5">
-                    {onboardingChecklist.length === 0 ? (
-                      <p className="text-sm leading-relaxed text-slate-500">
-                        {labels.onboardingComplete}
-                      </p>
-                    ) : (
-                      onboardingChecklist.map((item) => (
-                        <div key={item.key} className="flex items-center justify-between gap-3 text-sm">
-                          <span className="text-slate-600">{item.label}</span>
-                          <span className="tag-pill">{item.sectionLabel}</span>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
+                ) : null}
               </div>
 
               <div className="panel-surface p-5 md:p-6">
-                <div className="text-sm font-semibold text-slate-800">{labels.jumpToTitle}</div>
-                <div className="mt-4 grid gap-2">
-                  {sectionLinks.map((link) => (
-                    <a
-                      key={link.id}
-                      href={`#${link.id}`}
-                      className="panel-muted px-4 py-3 text-sm font-semibold text-slate-600 transition-all duration-200 hover:border-[#B91C1C]/18 hover:bg-white hover:text-slate-900"
-                    >
-                      {link.title}
-                    </a>
-                  ))}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => toggleSidebarPanel("completion")}
+                  aria-expanded={openSidebarPanel === "completion"}
+                  aria-controls="completion-progress-panel"
+                  className="flex w-full items-start justify-between gap-4 text-left"
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-[#B91C1C]" />
+                      <h2 className="font-display text-xl text-slate-900">
+                        {labels.completionTitle}
+                      </h2>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                      <span className="font-semibold text-[#B91C1C]">
+                        {completionState.percentage}% {labels.completeSuffix}
+                      </span>
+                      <span className="text-slate-400">•</span>
+                      <span className="text-slate-500">
+                        {completionState.requiredCompletedCount}/{completionState.requiredCount}{" "}
+                        {labels.requiredProgressLabel.toLowerCase()}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#B91C1C]/10 bg-[#B91C1C]/[0.05] text-[#B91C1C]">
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform duration-200 ${
+                        openSidebarPanel === "completion" ? "rotate-180" : ""
+                      }`}
+                    />
+                  </span>
+                </button>
+
+                {openSidebarPanel === "completion" ? (
+                  <div id="completion-progress-panel" className="mt-4">
+                    <div>
+                      <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
+                        <span>{labels.requiredProgressLabel}</span>
+                        <span className="normal-case text-[13px] tracking-normal text-slate-500">
+                          {completionState.requiredCompletedCount}/{completionState.requiredCount}
+                        </span>
+                      </div>
+                      <div className="progress-track mt-2">
+                        <div
+                          className="progress-fill transition-[width] duration-300"
+                          style={{ width: `${completionState.percentage}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="panel-muted mt-5 p-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                      <ListChecks className="h-4 w-4 text-[#B91C1C]" />
+                      <span>{labels.onboardingTitle}</span>
+                    </div>
+                    <div className="mt-3 space-y-2.5">
+                      {onboardingChecklist.length === 0 ? (
+                        <p className="text-sm leading-relaxed text-slate-500">
+                          {labels.onboardingComplete}
+                        </p>
+                      ) : (
+                        onboardingChecklist.map((item) => (
+                          <div key={item.key} className="flex items-center justify-between gap-3 text-sm">
+                            <span className="text-slate-600">{item.label}</span>
+                            <a
+                              href={`#${sectionIdByCompletionSection[item.section]}`}
+                              onClick={() => setActiveSectionId(sectionIdByCompletionSection[item.section])}
+                              className="tag-pill transition-colors hover:border-[#B91C1C]/24 hover:bg-[#B91C1C]/[0.1]"
+                            >
+                              {item.sectionLabel}
+                            </a>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                  </div>
+                ) : null}
               </div>
             </aside>
 
@@ -404,6 +588,7 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                     <InputControl
                       value={formData.fullName}
                       onChange={(event) => updateField("fullName", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.fullName)}
                       required
                     />
                   </Field>
@@ -421,6 +606,7 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                     <DateControl
                       value={formData.dateOfBirth}
                       onChange={(event) => updateField("dateOfBirth", event.target.value)}
+                      placeholder={getDatePlaceholder(labels.dob)}
                       required
                     />
                   </Field>
@@ -453,6 +639,7 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                     <InputControl
                       value={formData.weight}
                       onChange={(event) => updateField("weight", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.weight)}
                       inputMode="numeric"
                     />
                   </Field>
@@ -469,18 +656,23 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                     <InputControl
                       value={formData.community}
                       onChange={(event) => updateField("community", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.communityLabel)}
+                      required
                     />
                   </Field>
                   <Field label={labels.religion}>
                     <InputControl
                       value={formData.religion}
                       onChange={(event) => updateField("religion", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.religion)}
+                      required
                     />
                   </Field>
                   <Field label={labels.caste}>
                     <InputControl
                       value={formData.caste}
                       onChange={(event) => updateField("caste", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.caste)}
                       required
                     />
                   </Field>
@@ -488,36 +680,42 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                     <InputControl
                       value={formData.subCaste}
                       onChange={(event) => updateField("subCaste", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.subCaste)}
                     />
                   </Field>
                   <Field label={labels.gothram}>
                     <InputControl
                       value={formData.gothram}
                       onChange={(event) => updateField("gothram", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.gothram)}
                     />
                   </Field>
                   <Field label={labels.star}>
                     <InputControl
                       value={formData.star}
                       onChange={(event) => updateField("star", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.star)}
                     />
                   </Field>
                   <Field label={labels.raasi}>
                     <InputControl
                       value={formData.raasi}
                       onChange={(event) => updateField("raasi", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.raasi)}
                     />
                   </Field>
                   <Field label={labels.country}>
                     <InputControl
                       value={formData.country}
                       onChange={(event) => updateField("country", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.country)}
                     />
                   </Field>
                   <Field label={labels.state}>
                     <InputControl
                       value={formData.state}
                       onChange={(event) => updateField("state", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.state)}
                       required
                     />
                   </Field>
@@ -525,14 +723,22 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                     <InputControl
                       value={formData.city}
                       onChange={(event) => updateField("city", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.city)}
                       required
                     />
                   </Field>
                   <Field label={labels.residency}>
-                    <InputControl
+                    <SelectControl
                       value={formData.residencyStatus}
                       onChange={(event) => updateField("residencyStatus", event.target.value)}
-                    />
+                    >
+                      <option value="">{getSelectPlaceholder(labels.residency)}</option>
+                      {RESIDENCY_STATUS_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {translateDisplayValue(option, language)}
+                        </option>
+                      ))}
+                    </SelectControl>
                   </Field>
                 </FieldGrid>
               </Section>
@@ -547,56 +753,92 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                     <InputControl
                       value={formData.education}
                       onChange={(event) => updateField("education", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.education)}
                       required
                     />
                   </Field>
                   <Field label={labels.employedIn}>
-                    <InputControl
+                    <SelectControl
                       value={formData.employedIn}
                       onChange={(event) => updateField("employedIn", event.target.value)}
-                    />
+                    >
+                      <option value="">{getSelectPlaceholder(labels.employedIn)}</option>
+                      {EMPLOYED_IN_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {translateDisplayValue(option, language)}
+                        </option>
+                      ))}
+                    </SelectControl>
                   </Field>
                   <Field label={labels.occupation}>
                     <InputControl
                       value={formData.occupation}
                       onChange={(event) => updateField("occupation", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.occupation)}
                       required
                     />
                   </Field>
                   <Field label={labels.income}>
-                    <InputControl
+                    <SelectControl
                       value={formData.income}
                       onChange={(event) => updateField("income", event.target.value)}
-                    />
+                      required
+                    >
+                      <option value="">{getSelectPlaceholder(labels.income)}</option>
+                      {ANNUAL_INCOME_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {translateDisplayValue(option, language)}
+                        </option>
+                      ))}
+                    </SelectControl>
                   </Field>
                   <Field label={labels.familyStatus}>
-                    <InputControl
+                    <SelectControl
                       value={formData.familyStatus}
                       onChange={(event) => updateField("familyStatus", event.target.value)}
-                    />
+                      required
+                    >
+                      <option value="">{getSelectPlaceholder(labels.familyStatus)}</option>
+                      {FAMILY_STATUS_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {translateDisplayValue(option, language)}
+                        </option>
+                      ))}
+                    </SelectControl>
                   </Field>
                   <Field label={labels.familyType}>
-                    <InputControl
+                    <SelectControl
                       value={formData.familyType}
                       onChange={(event) => updateField("familyType", event.target.value)}
-                    />
+                      required
+                    >
+                      <option value="">{getSelectPlaceholder(labels.familyType)}</option>
+                      {FAMILY_TYPE_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {translateDisplayValue(option, language)}
+                        </option>
+                      ))}
+                    </SelectControl>
                   </Field>
                   <Field label={labels.fatherOccupation}>
                     <InputControl
                       value={formData.fatherOccupation}
                       onChange={(event) => updateField("fatherOccupation", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.fatherOccupation)}
                     />
                   </Field>
                   <Field label={labels.motherOccupation}>
                     <InputControl
                       value={formData.motherOccupation}
                       onChange={(event) => updateField("motherOccupation", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.motherOccupation)}
                     />
                   </Field>
                   <Field label={labels.brothers}>
                     <InputControl
                       value={formData.brothers}
                       onChange={(event) => updateField("brothers", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.brothers)}
                       inputMode="numeric"
                     />
                   </Field>
@@ -604,6 +846,7 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                     <InputControl
                       value={formData.sisters}
                       onChange={(event) => updateField("sisters", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.sisters)}
                       inputMode="numeric"
                     />
                   </Field>
@@ -617,22 +860,43 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
               >
                 <FieldGrid>
                   <Field label={labels.diet}>
-                    <InputControl
+                    <SelectControl
                       value={formData.diet}
                       onChange={(event) => updateField("diet", event.target.value)}
-                    />
+                    >
+                      <option value="">{getSelectPlaceholder(labels.diet)}</option>
+                      {DIET_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {translateDisplayValue(option, language)}
+                        </option>
+                      ))}
+                    </SelectControl>
                   </Field>
                   <Field label={labels.drinking}>
-                    <InputControl
+                    <SelectControl
                       value={formData.drinking}
                       onChange={(event) => updateField("drinking", event.target.value)}
-                    />
+                    >
+                      <option value="">{getSelectPlaceholder(labels.drinking)}</option>
+                      {HABIT_FREQUENCY_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {translateDisplayValue(option, language)}
+                        </option>
+                      ))}
+                    </SelectControl>
                   </Field>
                   <Field label={labels.smoking}>
-                    <InputControl
+                    <SelectControl
                       value={formData.smoking}
                       onChange={(event) => updateField("smoking", event.target.value)}
-                    />
+                    >
+                      <option value="">{getSelectPlaceholder(labels.smoking)}</option>
+                      {HABIT_FREQUENCY_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {translateDisplayValue(option, language)}
+                        </option>
+                      ))}
+                    </SelectControl>
                   </Field>
                   <Field label={labels.hobbies} className="md:col-span-2">
                     <InputControl
@@ -662,6 +926,7 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                     <InputControl
                       value={formData.partnerAgeFrom}
                       onChange={(event) => updateField("partnerAgeFrom", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.partnerAgeFrom)}
                       inputMode="numeric"
                     />
                   </Field>
@@ -669,45 +934,71 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                     <InputControl
                       value={formData.partnerAgeTo}
                       onChange={(event) => updateField("partnerAgeTo", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.partnerAgeTo)}
                       inputMode="numeric"
                     />
                   </Field>
                   <Field label={labels.partnerHeight}>
-                    <InputControl
+                    <SelectControl
                       value={formData.partnerHeight}
                       onChange={(event) => updateField("partnerHeight", event.target.value)}
-                    />
+                    >
+                      <option value="">{getSelectPlaceholder(labels.partnerHeight)}</option>
+                      {heightOptions.map((height) => (
+                        <option key={height} value={height}>
+                          {height}
+                        </option>
+                      ))}
+                    </SelectControl>
                   </Field>
                   <Field label={labels.partnerMaritalStatus}>
-                    <InputControl
+                    <SelectControl
                       value={formData.partnerMaritalStatus}
                       onChange={(event) =>
                         updateField("partnerMaritalStatus", event.target.value)
                       }
-                    />
+                    >
+                      <option value="">{getSelectPlaceholder(labels.partnerMaritalStatus)}</option>
+                      {MARITAL_STATUS_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {translateDisplayValue(option, language)}
+                        </option>
+                      ))}
+                    </SelectControl>
                   </Field>
                   <Field label={labels.partnerEducation}>
                     <InputControl
                       value={formData.partnerEducation}
                       onChange={(event) => updateField("partnerEducation", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.partnerEducation)}
                     />
                   </Field>
                   <Field label={labels.partnerOccupation}>
                     <InputControl
                       value={formData.partnerOccupation}
                       onChange={(event) => updateField("partnerOccupation", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.partnerOccupation)}
                     />
                   </Field>
                   <Field label={labels.partnerIncome}>
-                    <InputControl
+                    <SelectControl
                       value={formData.partnerIncome}
                       onChange={(event) => updateField("partnerIncome", event.target.value)}
-                    />
+                    >
+                      <option value="">{getSelectPlaceholder(labels.partnerIncome)}</option>
+                      {ANNUAL_INCOME_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {translateDisplayValue(option, language)}
+                        </option>
+                      ))}
+                    </SelectControl>
                   </Field>
                   <Field label={labels.partnerLocation}>
                     <InputControl
                       value={formData.partnerLocation}
                       onChange={(event) => updateField("partnerLocation", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.partnerLocation)}
+                      required
                     />
                   </Field>
                   <Field label={labels.partnerExpectations} className="md:col-span-2">
@@ -735,13 +1026,20 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                       type="email"
                       value={formData.email}
                       onChange={(event) => updateField("email", event.target.value)}
+                      placeholder={getFieldPlaceholder(labels.email)}
                       required
                     />
                   </Field>
                   <Field label={labels.phone}>
                     <InputControl
                       value={formData.phone}
-                      onChange={(event) => updateField("phone", event.target.value)}
+                      onChange={(event) =>
+                        updateField("phone", normalizePhoneInput(event.target.value))
+                      }
+                      placeholder={getFieldPlaceholder(labels.phone)}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={10}
                       required
                     />
                   </Field>
@@ -792,7 +1090,11 @@ export function EditProfile({ viewer, profile }: EditProfileProps) {
                   </p>
                 </div>
 
-                <button type="submit" disabled={isSaving} className="btn-primary">
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="btn-primary min-w-[11.5rem] shrink-0 whitespace-nowrap"
+                >
                   {isSaving ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -828,7 +1130,7 @@ function Section({
   return (
     <section id={id} className="panel-surface scroll-mt-28 p-6 md:p-8">
       <div className="max-w-2xl">
-        <h2 className="text-2xl text-slate-900" style={{ fontFamily: "var(--font-display)" }}>
+        <h2 className="font-display text-2xl text-slate-900">
           {title}
         </h2>
         <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{description}</p>
@@ -881,7 +1183,7 @@ function UploadCard({
   alt: string;
 }) {
   return (
-    <label className="panel-muted block cursor-pointer p-4 transition-all duration-200 hover:border-slate-300 hover:bg-white">
+    <label className="panel-muted elevated-card block cursor-pointer p-4">
       <div className="flex items-center justify-between gap-4">
         <div>
           <div className="text-sm font-semibold text-slate-800">{title}</div>
@@ -920,6 +1222,7 @@ function labelsByLanguage(language: "en" | "ta") {
         imageTooLarge: "2 MB-க்கு குறைவான படத்தை பதிவேற்றவும்.",
         readFileError: "தேர்ந்தெடுத்த கோப்பை வாசிக்க முடியவில்லை.",
         uploadError: "படத்தை பதிவேற்ற முடியவில்லை.",
+        interestsRequiredError: "குறைந்தது 3 விருப்பங்களைத் தேர்ந்தெடுக்கவும்.",
         updateSuccess: "சுயவிவரம் வெற்றிகரமாக புதுப்பிக்கப்பட்டது.",
         updateError: "சுயவிவரத்தை புதுப்பிக்க முடியவில்லை.",
         sectionLabel: "சுயவிவர திருத்தி",
@@ -1034,6 +1337,7 @@ function labelsByLanguage(language: "en" | "ta") {
         imageTooLarge: "Please upload an image smaller than 2 MB.",
         readFileError: "Unable to read the selected file.",
         uploadError: "Unable to upload image.",
+        interestsRequiredError: "Select at least 3 interests.",
         updateSuccess: "Profile updated successfully.",
         updateError: "Unable to update profile.",
         sectionLabel: "Profile editor",

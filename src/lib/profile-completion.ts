@@ -24,9 +24,12 @@ const FIELD_LABELS: Record<
   education: { en: "Education", ta: "கல்வி" },
   occupation: { en: "Occupation", ta: "தொழில்" },
   annualIncome: { en: "Annual income", ta: "வருடாந்திர வருமானம்" },
+  familyStatus: { en: "Family status", ta: "குடும்ப நிலை" },
+  familyType: { en: "Family type", ta: "குடும்ப வகை" },
   about: { en: "About you", ta: "உங்களைப் பற்றி" },
   hobbies: { en: "Hobbies", ta: "விருப்ப செயல்கள்" },
   selectedInterests: { en: "Interests", ta: "விருப்பங்கள்" },
+  partnerLocation: { en: "Preferred location", ta: "விருப்ப இடம்" },
   partnerExpectations: { en: "Partner expectations", ta: "இணைவர் எதிர்பார்ப்புகள்" },
   email: { en: "Email", ta: "மின்னஞ்சல்" },
   phone: { en: "Phone", ta: "தொலைபேசி" },
@@ -41,6 +44,8 @@ const SECTION_LABELS: Record<
   background: { en: "Background", ta: "பின்னணி" },
   career: { en: "Career", ta: "தொழில்" },
   story: { en: "Story", ta: "சுயவிவரக் கதை" },
+  partner: { en: "Partner", ta: "இணைவர்" },
+  interests: { en: "Interests", ta: "விருப்பங்கள்" },
   contact: { en: "Contact", ta: "தொடர்பு" },
 };
 
