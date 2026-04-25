@@ -182,7 +182,7 @@ export function About({ viewer }: AboutProps) {
                 {
                   year: "2015",
                   title: language === "ta" ? "அடித்தளம்" : "Foundation",
-                  desc: language === "ta" ? "தமிழ் குடும்பங்களுக்கு சேவை செய்வதற்கான நோக்கத்துடன் AV தமிழ் மேட்ரிமோனி தொடங்கப்பட்டது" : "AV Tamil Matrimony was founded with a vision to serve Tamil families",
+                  desc: language === "ta" ? "தமிழ் குடும்பங்களுக்கு சேவை செய்வதற்கான நோக்கத்துடன் AVTamil Matrimony தொடங்கப்பட்டது" : "AVTamil Matrimony was founded with a vision to serve Tamil families",
                 },
                 {
                   year: "2018",

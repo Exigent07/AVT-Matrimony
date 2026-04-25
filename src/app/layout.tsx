@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope, Geist } from "next/font/google";
 import { AppProviders } from "@/providers/AppProviders";
+import { getIntroLoaderBootstrapScript } from "@/lib/intro-loader";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -23,8 +24,8 @@ const displayFont = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   title: {
-    default: "AV Tamil Matrimony",
-    template: "%s | AV Tamil Matrimony",
+    default: "AVTamil Matrimony",
+    template: "%s | AVTamil Matrimony",
   },
   description:
     "A family-centered Tamil matrimony experience with verified profiles, bilingual support, and thoughtful matching tools.",
@@ -38,8 +39,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn("h-full", "antialiased", bodyFont.variable, displayFont.variable, "font-sans", geist.variable)}
     >
+      <head>
+        <script
+          id="intro-loader-bootstrap"
+          dangerouslySetInnerHTML={{ __html: getIntroLoaderBootstrapScript() }}
+        />
+      </head>
       <body className="min-h-full bg-background text-foreground font-sans">
         <AppProviders>{children}</AppProviders>
       </body>

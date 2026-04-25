@@ -46,7 +46,7 @@ interface HeaderActionLink extends AccountDropdownLink {}
 
 function HeaderShell({ children }: { children: React.ReactNode }) {
   return (
-    <header className="sticky top-0 z-50 px-3 py-3 sm:px-4 md:px-6">
+    <header className="sticky top-0 z-50 px-3 py-2.5 sm:px-4 sm:py-3 md:px-6">
       <div className="mx-auto max-w-7xl">
         <div className="nav-shell">{children}</div>
       </div>
@@ -56,8 +56,8 @@ function HeaderShell({ children }: { children: React.ReactNode }) {
 
 function HeaderBrand({ href }: { href: string }) {
   return (
-    <Link href={href} className="min-w-0 shrink-0 transition-opacity hover:opacity-90">
-      <Logo size="small" showText={true} showTagline={false} />
+    <Link href={href} className="nav-brand min-w-0 shrink-0 transition-opacity hover:opacity-90">
+      <Logo size="header" showText={true} showTagline={false} />
     </Link>
   );
 }
@@ -194,8 +194,8 @@ export function AppHeader({
 
   return (
     <HeaderShell>
-      <div className="flex items-center gap-3 lg:gap-5">
-        <div className="flex min-w-0 flex-1 items-center justify-between gap-3 lg:flex-none lg:justify-start">
+      <div className="flex items-center gap-4 lg:gap-6">
+        <div className="flex min-w-0 flex-1 items-center justify-between gap-4 lg:flex-none lg:justify-start">
           <div className="flex min-w-0 items-center gap-3 sm:gap-4 md:gap-5">
             <HeaderBrand
               href={
@@ -208,10 +208,10 @@ export function AppHeader({
             />
           </div>
 
-          <div className="flex items-center gap-2 lg:hidden">
+          <div className="flex items-center gap-2.5 lg:hidden">
             <button
               onClick={() => setMobileMenuOpen((open) => !open)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.05] text-gray-200 hover:bg-white/[0.09]"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.05] text-gray-200 hover:bg-white/[0.09]"
               aria-label={
                 mobileMenuOpen
                   ? language === "ta"
@@ -222,14 +222,14 @@ export function AppHeader({
                     : "Open menu"
               }
             >
-              {mobileMenuOpen ? <X className="h-4.5 w-4.5" /> : <Menu className="h-4.5 w-4.5" />}
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
 
         {navigationLinks.length > 0 ? (
-          <nav className="hidden min-w-0 flex-1 justify-center lg:flex">
-            <div className="flex flex-wrap items-center justify-center gap-0.5 rounded-full border border-white/[0.07] bg-white/[0.04] p-1">
+          <nav className="hidden min-w-0 flex-1 justify-center px-2 xl:px-4 lg:flex">
+            <div className="flex flex-wrap items-center justify-center gap-1 rounded-full border border-white/[0.07] bg-white/[0.04] p-1.5">
               {navigationLinks.map((item) => {
                 const active = activeLink === item.id;
 
@@ -258,14 +258,14 @@ export function AppHeader({
           <div className="hidden flex-1 lg:block" />
         )}
 
-        <div className="hidden shrink-0 items-center justify-end gap-2.5 lg:flex">
+        <div className="hidden shrink-0 items-center justify-end gap-2.5 xl:gap-3 lg:flex">
           {rightContent}
+          <LanguageToggle variant="nav-inline" />
           <AccountDropdown
             label={resolvedMode === "admin" ? viewer?.fullName ?? resolvedAdminName : triggerLabel}
             avatarUrl={viewer?.profilePhotoUrl}
             fallbackIcon={resolvedMode === "admin" ? Shield : triggerIcon}
             links={actionLinks}
-            includeLanguageToggle
             onLogout={viewer ? () => void handleLogout() : undefined}
           />
         </div>

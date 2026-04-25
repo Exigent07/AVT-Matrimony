@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Heart, LogOut, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { AnimatedHeartIcon } from "@/components/shared/AnimatedHeartIcon";
-import { LanguageToggle } from "@/components/shared/LanguageToggle";
 import { useLanguage } from "@/providers/LanguageProvider";
 
 export interface AccountDropdownLink {
@@ -20,7 +19,6 @@ interface AccountDropdownProps {
   avatarUrl?: string | null;
   fallbackIcon: LucideIcon;
   links: AccountDropdownLink[];
-  includeLanguageToggle?: boolean;
   onLogout?: () => void;
 }
 
@@ -29,7 +27,6 @@ export function AccountDropdown({
   avatarUrl,
   fallbackIcon: FallbackIcon,
   links,
-  includeLanguageToggle = false,
   onLogout,
 }: AccountDropdownProps) {
   const { language } = useLanguage();
@@ -124,19 +121,9 @@ export function AccountDropdown({
                   <span>{item.label}</span>
                 </Link>
               ))}
-              {includeLanguageToggle ? (
-                <>
-                  {hasLinks ? (
-                    <div className="mx-2 my-1 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
-                  ) : null}
-                  <div className="px-3 py-2">
-                    <LanguageToggle />
-                  </div>
-                </>
-              ) : null}
               {onLogout ? (
                 <>
-                  {hasLinks || includeLanguageToggle ? (
+                  {hasLinks ? (
                     <div className="mx-2 my-1 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
                   ) : null}
                   <button

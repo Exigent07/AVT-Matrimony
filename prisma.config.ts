@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 const prismaConfig = {
   schema: "prisma/schema.prisma",
@@ -8,7 +8,7 @@ const prismaConfig = {
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    url: process.env.DATABASE_URL ?? "file:./dev.db",
   },
 };
 

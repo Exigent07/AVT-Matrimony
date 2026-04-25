@@ -4,11 +4,44 @@ import { motion } from "motion/react";
 import { useLanguage } from "@/providers/LanguageProvider";
 
 interface LanguageToggleProps {
-  variant?: "dark" | "light";
+  variant?: "dark" | "light" | "nav-inline";
 }
 
 export function LanguageToggle({ variant = "dark" }: LanguageToggleProps) {
   const { language, setLanguage } = useLanguage();
+
+  if (variant === "nav-inline") {
+    const activeClass = "text-white";
+    const inactiveClass = "text-gray-400 hover:text-gray-100";
+
+    return (
+      <div
+        className="inline-flex h-11 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5"
+        role="group"
+        aria-label="Language switch"
+      >
+        <button
+          onClick={() => setLanguage("en")}
+          aria-pressed={language === "en"}
+          className={`text-sm font-semibold transition-colors ${
+            language === "en" ? activeClass : inactiveClass
+          }`}
+        >
+          EN
+        </button>
+        <span className="h-4 w-px bg-white/[0.12]" aria-hidden="true" />
+        <button
+          onClick={() => setLanguage("ta")}
+          aria-pressed={language === "ta"}
+          className={`text-sm font-semibold transition-colors ${
+            language === "ta" ? activeClass : inactiveClass
+          }`}
+        >
+          தமிழ்
+        </button>
+      </div>
+    );
+  }
 
   const bgClass =
     variant === "dark"

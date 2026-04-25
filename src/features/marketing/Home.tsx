@@ -67,7 +67,7 @@ export function Home({ viewer }: HomeProps) {
           journeyDescription: "Four clear steps, shaped for families who want clarity, trust, and a serious path to marriage.",
           learnProcess: "Learn more about our process",
           differenceLabel: "Our difference",
-          differenceTitle: "Why AV Tamil Matrimony",
+          differenceTitle: "Why AVTamil Matrimony",
           differenceDescription: "Every part of the experience is tuned for trust, seriousness, and long-term family fit.",
           realConnectionsLabel: "Real connections",
           realConnectionsDescription: "Real couples, real family trust, and stories shaped by compatibility instead of noise.",
@@ -203,7 +203,7 @@ export function Home({ viewer }: HomeProps) {
                   <img
                     src="/images/hero-decor.png"
                     alt={language === "ta" ? "தமிழ் திருமண அலங்காரம்" : "Traditional Tamil wedding décor"}
-                    className="aspect-[16/7] w-full object-cover"
+                    className="aspect-[16/10] w-full object-cover"
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none';
                     }}
