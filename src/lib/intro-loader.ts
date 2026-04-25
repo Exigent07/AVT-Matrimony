@@ -9,7 +9,9 @@ export function getIntroLoaderBootstrapScript() {
         sessionStorage.getItem(${JSON.stringify(INTRO_LOADER_STORAGE_KEY)}) === "true"
           ? "true"
           : "false";
-    } catch {
+    } catch (e) {
+      // Fall back to memory-only tracking if sessionStorage is inaccessible (e.g., proxied domains)
+      window.__introLoaderSeen = false;
       document.documentElement.dataset.introLoaderSeen = "false";
     }
   `;

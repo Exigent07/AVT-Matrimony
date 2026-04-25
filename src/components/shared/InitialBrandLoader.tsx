@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import {
   INTRO_LOADER_ANIMATION_MS,
@@ -34,7 +33,9 @@ export function InitialBrandLoader() {
       try {
         sessionStorage.setItem(INTRO_LOADER_STORAGE_KEY, "true");
       } catch {
-        // Storage access can fail in privacy modes, so we fail open.
+        // Storage access can fail in privacy modes or when proxied (e.g., cloudflared).
+        // Use memory-based fallback.
+        window.__introLoaderSeen = true;
       }
 
       document.documentElement.dataset.introLoaderSeen = "true";
@@ -66,13 +67,12 @@ export function InitialBrandLoader() {
         <div className="site-loader__halo site-loader__halo--secondary" aria-hidden="true" />
 
         <div className="site-loader__mark">
-          <Image
+          <img
             src="/images/avt-logo.png"
             alt=""
-            fill
-            preload
-            sizes="(max-width: 768px) 96px, 124px"
+            loading="eager"
             className="object-contain"
+            style={{ width: "100%", height: "100%" }}
           />
         </div>
 

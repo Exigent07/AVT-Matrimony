@@ -203,28 +203,11 @@ export function Home({ viewer }: HomeProps) {
                   <img
                     src="/images/hero-decor.png"
                     alt={language === "ta" ? "தமிழ் திருமண அலங்காரம்" : "Traditional Tamil wedding décor"}
-                    className="aspect-[16/10] w-full object-cover"
+                    className="aspect-[16/7] w-full object-cover"
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).parentElement!.style.display = 'none';
                     }}
                   />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.46 }}
-                  className="mt-5 grid gap-3 sm:grid-cols-3"
-                >
-                  {copy.heroChips.map((item) => (
-                    <div
-                      key={item}
-                      className="rounded-[1.35rem] border border-[#B91C1C]/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(250,245,237,0.92))] px-4 py-4 shadow-[0_14px_28px_rgba(15,23,42,0.04)]"
-                    >
-                      <div className="h-[1.5px] w-10 rounded-full bg-gradient-to-r from-[#B91C1C]/50 to-transparent" />
-                      <div className="mt-3 text-sm font-semibold leading-snug text-slate-900">{item}</div>
-                    </div>
-                  ))}
                 </motion.div>
               </div>
             </div>
