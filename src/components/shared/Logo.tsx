@@ -3,7 +3,7 @@
 import Image from "next/image";
 
 interface LogoProps {
-  size?: "small" | "medium" | "large";
+  size?: "small" | "header" | "medium" | "large";
   showText?: boolean;
   showTagline?: boolean;
   siteName?: string;
@@ -15,22 +15,31 @@ export function Logo({
   size = "medium",
   showText = true,
   showTagline = true,
-  siteName = "AV Tamil Matrimony",
+  siteName = "AVTamil Matrimony",
   tagline = "திருமண சேவை",
   variant = "dark",
 }: LogoProps) {
   const sizeClasses = {
-    small: "h-10 w-10 sm:h-11 sm:w-11",
-    medium: "h-14 w-14 md:h-16 md:w-16",
-    large: "h-20 w-20 md:h-24 md:w-24",
+    small: "h-10 aspect-square sm:h-11",
+    header: "h-[3.125rem] aspect-square sm:h-14",
+    medium: "h-14 aspect-square md:h-16",
+    large: "h-20 aspect-square md:h-24",
   };
   const imageSizes = {
     small: "48px",
+    header: "(max-width: 640px) 50px, 56px",
     medium: "64px",
     large: "96px",
   };
+  const layoutClasses = {
+    small: { root: "gap-3", divider: "h-5" },
+    header: { root: "gap-3 sm:gap-4", divider: "h-6" },
+    medium: { root: "gap-3", divider: "h-6" },
+    large: { root: "gap-4", divider: "h-7" },
+  };
   const textSizeClasses = {
     small: { name: "text-[15px]", tagline: "text-[10px]" },
+    header: { name: "text-[15px] sm:text-[17px]", tagline: "text-[10px] sm:text-[11px]" },
     medium: { name: "text-[17px]", tagline: "text-[11px]" },
     large: { name: "text-[2rem]", tagline: "text-[13px]" },
   };
@@ -40,7 +49,7 @@ export function Logo({
   const taglineColor = isDark ? "text-white/50" : "text-slate-500";
 
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className={`flex min-w-0 items-center ${layoutClasses[size].root}`}>
       {/* Logo image — transparent PNG, no frame on dark variant */}
       <div className={`${sizeClasses[size]} relative shrink-0`}>
         {isDark ? (
@@ -68,7 +77,7 @@ export function Logo({
         <>
           {/* Thin vertical divider — only on dark nav */}
           {isDark && (
-            <div className="h-5 w-px shrink-0 bg-white/15" />
+            <div className={`${layoutClasses[size].divider} w-px shrink-0 bg-white/15`} />
           )}
           <div className="min-w-0">
             <div

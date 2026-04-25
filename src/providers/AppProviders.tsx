@@ -9,6 +9,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { Toaster } from "sonner";
+import { InitialBrandLoader } from "@/components/shared/InitialBrandLoader";
 import { LanguageProvider } from "@/providers/LanguageProvider";
 
 interface AppProvidersProps {
@@ -20,6 +21,7 @@ export function AppProviders({ children }: AppProvidersProps) {
 
   return (
     <LanguageProvider>
+      <InitialBrandLoader />
       {children}
       <Toaster
         {...runtimeToasterProps}

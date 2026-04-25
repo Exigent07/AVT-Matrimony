@@ -350,9 +350,9 @@ const translations = {
     'site.tagline.full': 'உங்கள் சரியான ஜோடியை கண்டறியவும்',
     
     // Header
-    'header.how.it.works': 'எப்படி வேலை செய்கிறது',
-    'header.about.us': 'எங்களைப் பற்றி',
-    'header.success.stories': 'வெற்றிக் கதைகள்',
+    'header.how.it.works': 'செயல்முறை',
+    'header.about.us': 'அறிமுகம்',
+    'header.success.stories': 'வெற்றிகள்',
     
     // Home Page
     'home.hero.title': 'உங்கள் வாழ்க்கைத் துணையைக் கண்டறியவும்',
